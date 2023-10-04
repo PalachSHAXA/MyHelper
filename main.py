@@ -32,7 +32,7 @@ admin = get_admins_list()
 print(admin)
 # print(admin)
 
-boss = [104314498]
+boss = [104314498, 1625223180]
 # boss = [1043144098]
 # print(boss)
 ru = ('ru',)
@@ -94,7 +94,6 @@ async def cmd_create(message: types.Message) -> None:
     # print(language)
     # print(address)
     if address == ('None',) or address is None or address == none:
-        # print('ok')
         if language == ru:
             await message.reply("Давайте зарегистрируем вас, для начала пришлите свое имя!",
                                 reply_markup=generate_name(name))
@@ -819,6 +818,7 @@ async def cmd_add(message: Message):
             await message.reply("Bu buyruq xabarga javob bo'lishi kerak!")
             # return
     # text.split('/answer')
+    # await bot.send_photo(chat_id=message.from_user.id, photo=message.photo, caption=message.caption)
     await bot.send_message(message.from_user.id,
                            f'{text}')
     if not admin:
@@ -899,7 +899,7 @@ async def process_request(message: Message, state: FSMContext):
             print(master_user)
             await bot.send_message(chat_id=group,
                                    text=f"Yangi tozalash so'rovi olindi,iltimos xizmat qiling:\n{master_user}")
-        full_name, phone, language, address, house_id = get_phone_and_address_by_id(user_id)
+        full_name, phone, language, address, house_id, branchh = get_phone_and_address_by_id(user_id)
         text = f"---Rezidentdan xizmat ko'rsatishni so'rash---\n"
         text += f'Ism: {full_name}\n'
         text += f'Yuzer: @{user_name}\n'
@@ -907,6 +907,7 @@ async def process_request(message: Message, state: FSMContext):
         text += f'Telefon raqami: +{phone}\n'
         text += f"Til: {language}\n"
         text += f"Manzil: {address}\n"
+        text += f"Filial: {branchh}\n"
         text += f"Shaxsiy hisob: {house_id}\n"
         text += f"Xizmat: \t{message.text}"
         # text += f"User servise: \t{message.text.split(' ')[1]}"
@@ -1310,11 +1311,11 @@ async def load_new_new_house_id(message: Message, state: FSMContext):
 @dp.message_handler(commands=['help'])
 async def admin_help(message: Message):
     user_id = message.from_user.id
-    if user_id in boss:
-        await message.reply(
+    # if user_id in boss:
+    await message.reply(
             "/id - пришлет вам ваш телеграмм id\n/register_admin - зарегистрирует админа\n/delete_admin - если напишет сам то удалит себя а если Джахонгир ака то после ввода его id\n/delete - тоже самое, только юзеров\n/sendall- отправит всем что вы напишите кто хотяб просто когда либо нажимал /start\n/send_branch - отправит рассылку на филиал на который вы укажите\n/get_user - вытащит все о юзере из базы данных (надо ввести его Id)\n/get_admin - работает так же как и get_user только с админами")
-    else:
-        await message.answer('error 404')
+    # else:
+    #     await message.answer('error 404')
 
 
 executor.start_polling(dp)

@@ -4,7 +4,7 @@ import sqlite3
 def get_phone_and_address_by_id(user_id):
     database = sqlite3.connect('myhelper.db')
     cursor = database.cursor()
-    cursor.execute("SELECT full_name, phone, language, address, house_id FROM users WHERE telegram_id=?", (user_id,))
+    cursor.execute("SELECT full_name, phone, language, address, house_id, branch FROM users WHERE telegram_id=?", (user_id,))
     result = cursor.fetchone()
     database.commit()
     database.close()
