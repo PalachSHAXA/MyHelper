@@ -249,13 +249,12 @@ def mailing_branch(branch):
     # list_chat = cursor.fetchall()
     cursor.execute(f"SELECT telegram_id FROM users")
     list_chat = cursor.fetchall()
+
     # print(list_chat)
     users = []
     if f'{branch}' == list_chat[0]:
         for user_id in list_chat[1]:
             users.append(*user_id)
-            # print(users)
-            # print('chotka')
     return users
 
 
@@ -324,10 +323,13 @@ def get_branch(branch: str):
     cursor.execute(f'''
     SELECT telegram_id FROM users WHERE branch = ?
     ''', (branch,))
-    ids = cursor.fetchone()
-    database.commit()
-    database.close()
-    return ids
+    list_chat = cursor.fetchall()
+    users = []
+    for user_id in list_chat:
+        users.append(*user_id)
+    # database.commit()
+    # database.close()
+    return users
 
 
 # def get_master(branch: str):

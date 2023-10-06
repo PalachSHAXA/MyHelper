@@ -430,11 +430,17 @@ async def get_user_id(message: Message):
 async def admin(message: Message):
     chat_id = message.from_user.id
     if message.text == '👨🏻‍💻Admin bilan boglanish📞':
-        await bot.send_contact(chat_id, first_name='Bosh Admin', last_name='Jahongiraka', phone_number='+998 95 388 88 01',
+        await bot.send_contact(chat_id, first_name='Jahongiraka', last_name='1 nomer', phone_number='+998 95 388 88 01',
+                               reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
+        await bot.send_contact(chat_id, first_name='Jahongiraka', last_name='2 nomer', phone_number='+998 93 505 01 81',
                                reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
     elif message.text == '👨🏻‍💻Связатся с Админом 📞':
-        await bot.send_contact(chat_id, first_name=' Главный Админ ', last_name='Жахонгирaka',
-                               phone_number='+998 95 388 88 01', reply_markup=generate_main_menu('Русский 🇷🇺'))
+            await bot.send_contact(chat_id, first_name='Жахонгирака', last_name='1 номер',
+                                   phone_number='+998 95 388 88 01',
+                                   reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
+            await bot.send_contact(chat_id, first_name='Жахонгирака', last_name='2 номер',
+                                   phone_number='+998 93 505 01 81',
+                                   reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
 
 
 @dp.message_handler(regexp='Я житель|Men rezidentman')
@@ -701,11 +707,6 @@ async def application(message: Message, state=FSMContext):
     user = first_select_users(user_id)
     async with state.proxy() as data:
         master = data['master_service']
-        # print(f'$$$$$$$$$$$$$${master}')
-    address = get_address(user_id)
-    # if user:
-    # if address == ('None',) or address == none or address is None:
-    # if user:
     if master == str('🔌 Электрик ⚡') or master == str('🔌 Elektrik ⚡'):
         if lang == ('uz',):
             await message.answer("Foydalanmoqchi bo'lgan elektrchining xizmat kodini tanlang ⬇️:",
@@ -714,7 +715,6 @@ async def application(message: Message, state=FSMContext):
         elif lang == ('ru',):
             await message.answer('Выберите код сервиса электрика которым хотите воспользоваться ⬇️:',
                                  reply_markup=generate_electric_menu())
-            # await message.answer(' ⬇️')
             await NewStateGroup.service.set()
     elif master == '👨‍🔧 Сантехник 🪠' or master == '🪠Santexnik 👨‍🔧':
         if lang == ('uz',):
@@ -872,11 +872,9 @@ async def cmd_add(message: Message):
     # text.split('/answer')
     # await bot.send_photo(chat_id=message.from_user.id, photo=message.photo, caption=message.caption)
     await bot.send_message(message.from_user.id,
-                           f'{text}')
+                           f'{text}', )
     if not admin:
         await message.answer('Это команда только для админов !')
-
-
 # ✅
 
 
@@ -959,13 +957,27 @@ async def process_request(message: Message, state: FSMContext):
         # await bot.send_photo(chat_id=group, photo=InputFile('media/93-3-2.png'))
         if language == 'ru':
             await message.answer('Ваша заявка принята ✅,\nскоро с вами свяжутся',
-                                 reply_markup=generate_main_menu('Russian 🇷🇺'))
+                                 reply_markup=generate_dov_menu('ru'))
+            await message.answer('После службы дайте нам знать, что вы думаете')
         elif language == 'uz':
             await message.answer("Sizning arizangiz qabul qilindi ✅,\ntez orada siz bilan bog'lanamiz",
-                                 reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
+                                 reply_markup=generate_dov_menu('uz'))
+            await message.answer("Xizmatdan so'ng, bizga fikringizni bildiring")
         await state.finish()
     else:
         await message.answer('else 404, no such branch')
+
+
+@dp.message_handler(regexp='🤗 Qoniq topdim rahmat ✅|🤗Доволен спасибо ✅')
+async def dovolen(message: Message):
+    user_id = message.from_user.id
+    lang = get_lang_by_id(user_id)
+    if lang == ru:
+        await message.answer('Спасибо за оценку качество,вы вернулись в главное меню:', reply_markup=generate_main_menu('Russian 🇷🇺'))
+    elif lang == uz:
+        await message.answer('Sifat reytingingiz uchun rahmat, siz asosiy menyuga qaytasiz:',
+                             reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
+    await bot.send_message(text=f'{message.from_user.full_name}dan\t- @{message.from_user.username}\t{message.text}\nrezidentdan minnatdorchilik bildirildi, MyHelper jamoasiga raxmat', chat_id=group)
 
     # else:
     #     await message.answer('error 404')
@@ -974,20 +986,32 @@ async def process_request(message: Message, state: FSMContext):
     # else:
 
 
-    # @dp.message_handler(regexp='❌ Не довлен 😕|❌ Qoniqarli emas 😕')
+@dp.message_handler(regexp='❌ Не довлен 😕|❌ Qoniqarli emas 😕')
+async def nedovolen(message: Message):
+    user_id = message.from_user.id
+    lang = get_lang_by_id(user_id)
+    if lang == ru:
+        await message.answer('Спасибо за оценку качество,вы вернулись в главное меню:',
+                             reply_markup=generate_main_menu('Russian 🇷🇺'))
+    elif lang == uz:
+        await message.answer('Sifat reytingingiz uchun rahmat, siz asosiy menyuga qaytasiz:',
+                             reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
+    await bot.send_message(
+            text=f'{message.from_user.full_name}dan\t- @{message.from_user.username}\t{message.text}\nrezidentdan servisdan maqulmasligini bildirildi, MyHelper jamoasiga',
+            chat_id=group)
 
 
-@dp.message_handler(commands=['end'])
-async def end_servise(message: Message):
-    # user_id = message.forward_from.full_name
-    # print(user_id)
-    # photo = message.photo
-    await message.answer(f'{ message.forward_from.full_name}')
-
-    caption = message.caption.split('/end')[1]
-    # await bot.send_message(chat_id=user_id, text=caption)
-    # await bot.send_photo(chat_id=user_id, photo=photo, caption=caption)
-    await message.answer('❌')
+# @dp.message_handler(commands=['end'])
+# async def end_servise(message: Message):
+#     # user_id = message.forward_from.full_name
+#     # print(user_id)
+#     # photo = message.photo
+#     await message.answer(f'{ message.forward_from.full_name}')
+#
+#     caption = message.caption.split('/end')[1]
+#     # await bot.send_message(chat_id=user_id, text=caption)
+#     # await bot.send_photo(chat_id=user_id, photo=photo, caption=caption)
+#     await message.answer('❌')
 
 
 # ✅
@@ -1006,9 +1030,17 @@ async def nope(message: Message):
 # ✅ ❌
 @dp.message_handler(regexp='Аварийная ситуация 🚨|Favqulodda vaziyat 🚨')
 async def green(message: Message):
-    await bot.send_photo(chat_id=message.from_user.id, photo=InputFile('media/green.jpg'),
-                         caption='90 957 60 56 -\tlift | лифт\n91 101 72 21 -\t santexnik | сантехник\n99 854 13 81 -\t elektrik | электрик\n93 541 22 99 -\t'
-                                 'domofon | домофон\n99 791 99 95 -\t qorovul | охранник'),
+    user_id = message.from_user.id
+    lang = get_lang(user_id)
+    branch = get_user_branch(user_id)
+    if branch == ('GreenPark',):
+        await bot.send_photo(chat_id=message.from_user.id, photo=InputFile('media/green.jpg'),
+                             caption='+998 90 957 60 56 -\tlift | лифт\n+998 95 388 88 05 -\t santexnik | сантехник\n+998 95 388 88 05 -\t elektrik | электрик\n+998 93 541 22 99 -\t'
+                                     'domofon | домофон\n+998 95 388 88 04 -\tqorovul | охранник\n+998 95 388 88 07 - sifat menedjeri | менеджер по качеству'),
+    elif branch == ('Adliya',):
+        await bot.send_photo(chat_id=message.from_user.id, photo=InputFile('media/green.jpg'),
+                             caption='90 957 60 56 -\tlift | лифт\n91 101 72 21 -\t santexnik | сантехник\n99 854 13 81 -\t elektrik | электрик\n+998971034501 -\t'
+                                     'domofon | домофон\n+998 997919995 -\t qorovul | охранник'),
 
 
 # ✅
@@ -1026,14 +1058,13 @@ async def get_num(message: Message):
         group_933 = [
             types.InputMediaPhoto(media=open('media/adliya1.jpg', 'rb')),
             types.InputMediaPhoto(media=open('media/adliya2.jpg', 'rb'))
-
         ]
-
         await bot.send_media_group(message.chat.id, media=group_933)
         if lang == uz:
             await message.answer("Adliya da yashovchilar ro'yxatidan shaxsiy hisobingizni qidiring", reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
         elif lang == ru:
             await message.answer("Найдите свой лицевой счет в списке живуших в Adliya", reply_markup=generate_main_menu('Russian 🇷🇺'))
+
 
 # ✅
 @dp.message_handler(regexp='Dom 93-3|Dom 95-2|Dom 95-3|Dom 97-2|Dom 97-1')
@@ -1153,6 +1184,7 @@ async def send_all(message: Message, state: FSMContext):
         await state.finish()
     else:
         if message.chat.id == group:
+            print(users)
             for user_id in users:
                 await bot.send_photo(chat_id=user_id, photo=InputFile('media/news.jpg'), caption=caption),
             await message.answer('Рассылка отправлена')
@@ -1161,10 +1193,7 @@ async def send_all(message: Message, state: FSMContext):
 @dp.message_handler(commands=['send_branch'])
 async def send_branch(message: Message, state: FSMContext):
     user_id = message.from_user.id
-    # chat_id = message.chat.id
-    # print(user_id)
-    # print(boss)
-    # print(user_id == boss)
+
     if message.chat.id == group:
         await message.answer('Выберите филиал которому хотите отправить рассылку', reply_markup=generate_branch_menu())
         await ServiceGroup.branch.set()
@@ -1177,16 +1206,21 @@ async def send_branch(message: Message, state: FSMContext):
 async def branch_sr(message: Message, state: FSMContext):
     async with state.proxy() as data:
         branch = data['branch_sr'] = message.text
+        print(branch)
         await ServiceGroup.next()
         await message.answer(f'Теперь отправьте что хотите расслать {branch}')
 
 
 @dp.message_handler(state=ServiceGroup.title)
 async def title_send(message: Message, state: FSMContext):
+    user_id = message.from_user.id
     caption = message.text
     async with state.proxy() as data:
         branch = data['branch_sr']
+    # branch = get_user_branch(user_id)
+    print(branch)
     users = get_branch(branch)
+    print(users)
     if message.chat.id == group:
         for user in users:
             await bot.send_photo(chat_id=user, photo=InputFile('media/news.jpg'), caption=f'{branch}\n{caption}'),
