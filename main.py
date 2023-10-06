@@ -29,10 +29,10 @@ user_data = {}
 group = GROUP_ID
 logging.basicConfig(level=logging.INFO)
 admin = get_admins_list()
-print(admin)
+# print(admin)
 # print(admin)
 
-boss = [104314498, 1625223180]
+boss = (104314498, 1625223180, 1043144098)
 # boss = [1043144098]
 # print(boss)
 ru = ('ru',)
@@ -452,15 +452,62 @@ async def inhabitant(message: Message):
 
 
 @dp.message_handler(regexp='Гость|Mehmon')
-async def guest(message: Message):
+async def guest(message: Message, state: FSMContext):
     user_id = message.from_user.id
     lang = get_lang(user_id)
-    await send_location(message)
     if lang == ('uz',):
-        await message.answer("Mana Green Park aholisining joylashuvi",
-                             reply_markup=generate_back_menu('Özbekcha 🇺🇿'))
+        await message.answer("Iltimos kelayotgan odamingizni filialini talang",
+                             reply_markup=generate_branch_menu())
+        await NewStateGroup.branch.set()
+                             # reply_markup=generate_back_menu('Özbekcha 🇺🇿'))
     if lang == ('ru',):
-        await message.answer('Вот расположение жителей Грин Парка', reply_markup=generate_back_menu("Russian 🇷🇺"))
+        await message.answer('Пожалуйста выберите филиал к кому вы едите', reply_markup=generate_branch_menu())
+        await NewStateGroup.branch.set()
+
+
+@dp.message_handler(state=NewStateGroup.branch)
+async def loc(message: Message, state: FSMContext):
+    user_id = message.from_user.id
+    branch = message.text
+    lang = get_lang(user_id)
+    if branch == 'GreenPark':
+        await message.answer('https://yandex.uz/maps/-/CDUty4Pf')
+        await bot.send_location(message.chat.id, latitude=41.305242, longitude=69.324845)
+        await state.finish()
+        if lang == ru:
+            await message.answer('Вот локация место проживания людей живуших в GreenPark', reply_markup=generate_back_menu('ru'))
+        elif lang == uz:
+            await message.answer('GreenPark aholisning turar joy lakatsiyasi', reply_markup=generate_back_menu('uz'))
+    elif branch == 'Adliya':
+        await message.answer('https://yandex.uz/maps/-/CDUtyYjT')
+        await bot.send_location(message.chat.id, latitude=41.304994, longitude=69.322362)
+        await state.finish()
+        if lang == ru:
+            await message.answer('Вот локация место проживания людей живуших в Adliya',
+                                 reply_markup=generate_back_menu('ru'))
+        elif lang == uz:
+            await message.answer('Adliya aholisning turar joy lakatsiyasi', reply_markup=generate_back_menu('uz'))
+
+    # 41.304994, 69.322362
+
+
+    # await send_location(message)
+
+
+# @dp.message_handler(commands=['send_location'])
+# async def send_location(message: types.Message):
+#     user_id = message.from_user.id
+#     branch = get_user_branch(user_id)
+#     lang = get_lang(user_id)
+#     if branch == ('GreenPark',):
+#         await bot.send_location(message.chat.id, latitude=41.305242, longitude=69.324845)
+#     elif branch == ('Adliya',):
+#         await bot.send_location(message.chat.id, latitude=41.305242, longitude=69.324845)
+#     else:
+#         if lang == ru:
+#             await message.answer('My Helper не подерживает это место')
+#         elif lang == uz:
+#             await message.answer('My Helper siz yozgan joyga qaramaydi')
 
 
 @dp.message_handler(regexp='Пропустить|Otqazib yuborish')
@@ -472,9 +519,9 @@ async def skip(message: Message, state: FSMContext):
     elif lang == uz:
         await message.answer("Shaxsiy hisobingizni aniqlaganingizdan so'ng, uni sozlamalarga qo'shing")
     await ProfileStatesGroup.next()
-
-
 # ✅
+
+
 @dp.message_handler(regexp='Русский 🇷🇺|Özbekcha 🇺🇿')
 async def set_language(message: Message):
     user_id = message.from_user.id
@@ -628,6 +675,11 @@ async def uborka(message: Message, state: FSMContext):
     # print(master)
 
 
+# ✅
+# ✅
+
+# print(master == '🧹Уборка 🧼' or '🧹Uborka 🧼')
+
 @dp.message_handler(regexp='Продолжить|Davom etish')
 async def dalshe(message: Message):
     user_id = message.from_user.id
@@ -641,11 +693,6 @@ async def dalshe(message: Message):
             'Чтобы узнать подезд этаж  и номер квартиры спроси те номер дицевого счета к кому вы едите, и пришлите его мне\n!(Важно чтоб он/она была зарегестрирована)!')
         await NewStateGroup.guest.set()
 
-
-# ✅
-# ✅
-
-# print(master == '🧹Уборка 🧼' or '🧹Uborka 🧼')
 
 @dp.message_handler(regexp='Дa ✅|Ha ✅')
 async def application(message: Message, state=FSMContext):
@@ -758,6 +805,9 @@ async def info(message: Message):
             f'~~~Анкета~~~\nИмя:\t{name}\nId:\t{user_id}\nТелефон номер:\t+{phone}\nЯзык:\t{language}\nЛицевой счет:\t{house_id}\nАддресс:\t{address}')
 
 
+# ❌
+
+
 @dp.message_handler(state=NewStateGroup.guest)
 async def cmd_get_user(message: Message, state: FSMContext):
     user_id = message.from_user.id
@@ -777,7 +827,8 @@ async def cmd_get_user(message: Message, state: FSMContext):
                 text += f"Язык: {language}\n"
                 text += f"Адрес: {address}\n"
                 # text += f"house_id: {house_id}\n"
-                await message.answer(text=text)
+                await message.answer(text=text, reply_markup=generate_back_menu('ru'))
+                await message.answer('Данные нашлись ✅')
             elif language == uz:
                 text = f"---Malumot---\n"
                 text += f'Ism: {full_name}\n'
@@ -785,19 +836,20 @@ async def cmd_get_user(message: Message, state: FSMContext):
                 text += f"til: {language}\n"
                 text += f"address: {address}\n"
                 # text += f"house_id: {house_id}\n"
-                await message.answer(text=text)
-        await guest(message)
+                await message.answer(text=text, reply_markup=generate_back_menu('uz'))
+                await message.answer(text='Malumotlar topildi ✅')
+        # await guest(message)
         await state.finish()
     except Exception as e:
-        await message.answer('error 404')
-        if language == ('ru',):
-            await message.answer('Пользователя нет в базе данных перепроверьте')
-            await guest(message)
-        elif language == ('uz',):
-            await message.answer("Foydalanuvchi ma'lumotlar bazasida yo'q, ikki marta tekshiring")
-            await guest(message)
-
-        await state.finish()
+        if e:
+            if language == ('ru',):
+                await message.answer('Пользователя нет в базе данных перепроверьте')
+                await guest(message)
+            elif language == ('uz',):
+                await message.answer("Foydalanuvchi ma'lumotlar bazasida yo'q, qayta tekshiring")
+                await guest(message)
+            # await message.answer('error 404')
+            await state.finish()
 
     # await message.reply("Это команда должна быть ответом на сообщение !")
     # return
@@ -806,7 +858,7 @@ async def cmd_get_user(message: Message, state: FSMContext):
     # await bot.send_message(message.from_user.id, 'Ваш сервис был принят ждите !')
 
 
-# ❌
+# ✅
 
 
 @dp.message_handler(commands=['answer'])
@@ -841,9 +893,6 @@ async def feedback(message: Message, state: FSMContext):
         await message.answer(f'{text}\nваше предложение отправлено ✅')
 
 
-# ✅
-
-
 @dp.message_handler(regexp='📓 Shaxsiy hisob haqida bilib olish 🧮|📓 Узнать о лицевом счете 🧮')
 async def personality(message: Message):
     if message.text == '📓 Shaxsiy hisob haqida bilib olish 🧮':
@@ -855,12 +904,6 @@ async def personality(message: Message):
     #     await message.answer('Принятоб ждите пока вам ответят ')
     #     await bot.send_message(group, f'{message.from_user} '
     #                                   f'Просит свои даные лицевого счета ')
-
-
-@dp.message_handler(commands=['send_location'])
-async def send_location(message: types.Message):
-    await bot.send_location(message.chat.id, latitude=41.305242, longitude=69.324845)
-
 
 # ❌
 
@@ -877,7 +920,7 @@ async def process_request(message: Message, state: FSMContext):
         # print(branch == ('GreenPark',))
         # print(branch == ('QUSHBEGI'))
         # print('o00o', master == str('👨‍🔧 Сантехник 🪠') or master == str('🪠Santexnik 👨‍🔧'))
-    if branch == ('GreenPark',) or branch == ('QUSHBEGI',):
+    if branch == ('GreenPark',) or branch == ('Adliya',):
         if master == str('🔌 Электрик ⚡') or master == str('🔌 Elektrik ⚡'):
             master = 'Электрик'
             branch = '1/2'
@@ -931,6 +974,22 @@ async def process_request(message: Message, state: FSMContext):
     # else:
 
 
+    # @dp.message_handler(regexp='❌ Не довлен 😕|❌ Qoniqarli emas 😕')
+
+
+@dp.message_handler(commands=['end'])
+async def end_servise(message: Message):
+    # user_id = message.forward_from.full_name
+    # print(user_id)
+    # photo = message.photo
+    await message.answer(f'{ message.forward_from.full_name}')
+
+    caption = message.caption.split('/end')[1]
+    # await bot.send_message(chat_id=user_id, text=caption)
+    # await bot.send_photo(chat_id=user_id, photo=photo, caption=caption)
+    await message.answer('❌')
+
+
 # ✅
 @dp.message_handler(regexp='Нет ❌|Yoq ❌')
 async def nope(message: Message):
@@ -955,11 +1014,26 @@ async def green(message: Message):
 # ✅
 @dp.message_handler(regexp='Номер лицевого счета|Hisob raqami')
 async def get_num(message: Message):
-    if message.text == 'Номер лицевого счета':
-        await message.answer('Выберите номер здания', reply_markup=generate_get_number('Russian 🇷🇺'))
-    elif message.text == 'Hisob raqami':
-        await message.answer('Bino raqamini tanlang', reply_markup=generate_get_number('Özbekcha 🇺🇿'))
+    user_id = message.from_user.id
+    branch = get_user_branch(user_id)
+    lang = get_lang(user_id)
+    if branch == ('GreenPark',):
+        if message.text == 'Номер лицевого счета':
+            await message.answer('Выберите номер здания', reply_markup=generate_get_number('Russian 🇷🇺'))
+        elif message.text == 'Hisob raqami':
+            await message.answer('Bino raqamini tanlang', reply_markup=generate_get_number('Özbekcha 🇺🇿'))
+    elif branch == ('Adliya',):
+        group_933 = [
+            types.InputMediaPhoto(media=open('media/adliya1.jpg', 'rb')),
+            types.InputMediaPhoto(media=open('media/adliya2.jpg', 'rb'))
 
+        ]
+
+        await bot.send_media_group(message.chat.id, media=group_933)
+        if lang == uz:
+            await message.answer("Adliya da yashovchilar ro'yxatidan shaxsiy hisobingizni qidiring", reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
+        elif lang == ru:
+            await message.answer("Найдите свой лицевой счет в списке живуших в Adliya", reply_markup=generate_main_menu('Russian 🇷🇺'))
 
 # ✅
 @dp.message_handler(regexp='Dom 93-3|Dom 95-2|Dom 95-3|Dom 97-2|Dom 97-1')
@@ -1060,11 +1134,11 @@ async def duty(message: Message):
     home_id = get_home_id(user_id)
     lang = get_lang(user_id)
     if lang == ru:
-        await message.answer('Информацию о своем лицевом счете вы можете узнать используя click, payme uzum итд',
+        await message.answer('Информацию о своем лицевом счете вы можете узнать используя click, payme uzum итд, в разделе Mening Uyim',
                              reply_markup=generate_main_menu('Russian 🇷🇺'))
     elif lang == uz:
         await message.answer(
-            "Shaxsiy kabinetingiz haqidagi ma'lumotlarni click, payme uzum va boshqalarlar yordamida bilib olishingiz mumkin.",
+            "Shaxsiy kabinetingiz haqidagi ma'lumotlarni click, payme uzum va boshqalarlar yordamida bilib olishingiz mumkin, Mening Uyim servisida",
             reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
 
 
@@ -1074,27 +1148,28 @@ async def send_all(message: Message, state: FSMContext):
     user_id = message.from_user.id
     caption = message.text.split('/sendall')[1]
     users = mailing()
-    if boss in user_id:
+    if user_id in boss:
+        await message.answer('Это команда только для Жахонгир Ака')
+        await state.finish()
+    else:
         if message.chat.id == group:
             for user_id in users:
                 await bot.send_photo(chat_id=user_id, photo=InputFile('media/news.jpg'), caption=caption),
             await message.answer('Рассылка отправлена')
-    else:
-        await message.answer('Это команда только для Жахонгир Ака')
-        await state.finish()
 
 
 @dp.message_handler(commands=['send_branch'])
 async def send_branch(message: Message, state: FSMContext):
     user_id = message.from_user.id
+    # chat_id = message.chat.id
     # print(user_id)
     # print(boss)
     # print(user_id == boss)
-    if user_id in boss:
+    if message.chat.id == group:
         await message.answer('Выберите филиал которому хотите отправить рассылку', reply_markup=generate_branch_menu())
         await ServiceGroup.branch.set()
     else:
-        await message.answer('Это команда только для Жахонгир Ака')
+        await message.answer('Это команда только для Админов')
         await state.finish()
 
 
@@ -1113,10 +1188,10 @@ async def title_send(message: Message, state: FSMContext):
         branch = data['branch_sr']
     users = get_branch(branch)
     if message.chat.id == group:
-        for user_id in users:
-            await bot.send_photo(chat_id=user_id, photo=InputFile('media/news.jpg'), caption=f'{branch}\n{caption}'),
+        for user in users:
+            await bot.send_photo(chat_id=user, photo=InputFile('media/news.jpg'), caption=f'{branch}\n{caption}'),
             await state.finish()
-        await message.answer('Рассылка отправлена')
+            await message.answer('Рассылка отправлена')
 
 
 # @dp.message_handler(state=NewStateGroup.branch)

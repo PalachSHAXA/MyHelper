@@ -99,7 +99,7 @@ def generate_settings_menu(lang):
                                                                               KeyboardButton(text='Ismimni ozgartirish 👌'),
                                                                               KeyboardButton(text="Manzilni o'zgartirish 🏘️"),
                                                                               KeyboardButton(text="Shaxsiy hisobni o'zgartirish 🧮"),
-                                                                              KeyboardButton(text="📞 Telefon raqamini o'zgartirish ☎️|📞 Сменить номер телефона ☎️"),
+                                                                              KeyboardButton(text="📞 Telefon raqamini o'zgartirish ☎️"),
                                                                               KeyboardButton(text="Tilni o'zgartirish 🇺🇿 🔀 🇷🇺"),
                                                                               KeyboardButton(
                                                                                   text='⬅')
@@ -130,9 +130,9 @@ def generate_service_menu(lang):
 
 
 def generate_back_menu(lang):
-    if lang == "Russian 🇷🇺":
+    if lang == "ru":
         return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True).add(*[KeyboardButton(text='Я житель'), KeyboardButton(text='Продолжить')])
-    elif lang == 'Özbekcha 🇺🇿':
+    elif lang == 'uz':
         return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True).add(*[KeyboardButton(text='Men rezidentman'), KeyboardButton(text='Davom etish')])
 
 
@@ -314,9 +314,28 @@ def generate_branch_menu():
     return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True).add(*
                                                                                               [
                                                                                                   KeyboardButton(
-                                                                                                      text='GreenPark')
-                                                                                                  # KeyboardButton(
-                                                                                                      # text='QUSHBEGI')
+                                                                                                      text='GreenPark'),
+                                                                                                  KeyboardButton(
+                                                                                                      text='Adliya')
+                                                                                              ])
+
+
+def generate_dov_menu(lang):
+    if lang == 'ru':
+        return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True).add(*
+                                                                                              [
+                                                                                                  KeyboardButton(
+                                                                                                      text='🤗Доволен спасибо ✅'),
+                                                                                                  KeyboardButton(
+                                                                                                      text='❌ Не довлен 😕')
+                                                                                              ])
+    elif lang == 'uz':
+        return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True).add(*
+                                                                                              [
+                                                                                                  KeyboardButton(
+                                                                                                      text='🤗 Qoniq topdim rahmat ✅'),
+                                                                                                  KeyboardButton(
+                                                                                                      text='❌ Qoniqarli emas 😕')
                                                                                               ])
 
 
