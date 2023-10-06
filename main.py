@@ -430,7 +430,7 @@ async def get_user_id(message: Message):
 async def admin(message: Message):
     chat_id = message.from_user.id
     if message.text == '👨🏻‍💻Admin bilan boglanish📞':
-        await bot.send_contact(chat_id, first_name='Bosh Admin', last_name='Jahongiraka', phone_number=+998935050181,
+        await bot.send_contact(chat_id, first_name='Bosh Admin', last_name='Jahongiraka', phone_number='+998 95 388 88 01',
                                reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
     elif message.text == '👨🏻‍💻Связатся с Админом 📞':
         await bot.send_contact(chat_id, first_name=' Главный Админ ', last_name='Жахонгирaka',
