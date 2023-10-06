@@ -434,7 +434,7 @@ async def admin(message: Message):
                                reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
     elif message.text == '👨🏻‍💻Связатся с Админом 📞':
         await bot.send_contact(chat_id, first_name=' Главный Админ ', last_name='Жахонгирaka',
-                               phone_number=+998935050181, reply_markup=generate_main_menu('Русский 🇷🇺'))
+                               phone_number='+998 95 388 88 01', reply_markup=generate_main_menu('Русский 🇷🇺'))
 
 
 @dp.message_handler(regexp='Я житель|Men rezidentman')
