@@ -231,6 +231,18 @@ def update_address(address: str, user_id: int):
     database.close()
 
 
+def update_branch(branch: str, user_id: int):
+    database = sqlite3.connect('myhelper.db')
+    cursor = database.cursor()
+    cursor.execute(f'''
+    UPDATE users
+    SET branch = '{branch}'
+    WHERE telegram_id = ?
+    ''', (user_id, ))
+    database.commit()
+    database.close()
+
+
 def mailing():
     database = sqlite3.connect('myhelper.db')
     cursor = database.cursor()
