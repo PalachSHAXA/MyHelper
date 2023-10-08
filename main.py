@@ -1097,13 +1097,15 @@ async def green(message: Message):
     lang = get_lang(user_id)
     branch = get_user_branch(user_id)
     if branch == ('GreenPark',):
-        await bot.send_photo(chat_id=message.from_user.id, photo=InputFile('media/green.jpg'),
-                             caption='+998 90 957 60 56 -\tlift | лифт\n+998 95 388 88 05 -\t santexnik | сантехник\n+998 95 388 88 05 -\t elektrik | электрик\n+998 93 541 22 99 -\t'
+        await bot.send_photo(chat_id=message.from_user.id, photo=InputFile('media/gp.jpg'),
+                             caption='+998 90 957 60 56 -\tlift | лифт\n+998 95 388 88 06 -\t santexnik | сантехник\n+998 95 388 88 05 -\t elektrik | электрик\n+998 93 541 22 99 -\t'
                                      'domofon | домофон\n+998 95 388 88 04 -\tqorovul | охранник\n+998 95 388 88 07 - sifat menedjeri | менеджер по качеству'),
     elif branch == ('Adliya',):
-        await bot.send_photo(chat_id=message.from_user.id, photo=InputFile('media/green.jpg'),
-                             caption='90 957 60 56 -\tlift | лифт\n91 101 72 21 -\t santexnik | сантехник\n99 854 13 81 -\t elektrik | электрик\n+998971034501 -\t'
-                                     'domofon | домофон\n+998 997919995 -\t qorovul | охранник'),
+        await bot.send_photo(chat_id=message.from_user.id, photo=InputFile('media/adl.jpg'),
+                             caption='+998 90 957 60 56 -\tlift | лифт\n+998 95 388 88 06 -\t santexnik | сантехник\n+998 95 388 88 05 -\t elektrik | электрик\n+998 97 103 45 01 -\t'
+                                     'domofon | домофон\n+998 95 388 88 03 -\tqorovul | охранник\n+998 95 388 88 07 - sifat menedjeri | менеджер по качеству'),
+                                    # caption='90 957 60 56 -\tlift | лифт\n91 101 72 21 -\t santexnik | сантехник\n99 854 13 81 -\t elektrik | электрик\n+998971034501 -\t'
+                                     # 'domofon | домофон\n+998 997919995 -\t qorovul | охранник'),
 
 
 # ✅
