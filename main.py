@@ -956,7 +956,6 @@ async def title_send(message: Message, state: FSMContext):
             await message.answer('Yuborildi ✅')
 
 
-
 @dp.message_handler(state=NewStateGroup.offer)
 async def feedback(message: Message, state: FSMContext):
     # text = message.text.split(' ')[1]
@@ -1035,9 +1034,9 @@ async def process_request(message: Message, state: FSMContext):
         await bot.send_photo(chat_id=group, photo=InputFile('media/servise.png'), caption=text)
         # await bot.send_photo(chat_id=group, photo=InputFile('media/93-3-2.png'))
         if language == 'ru':
-            await message.answer('Ваша заявка принята ✅,\nскоро с вами свяжутся')
+            await message.answer('Ваша заявка принята ✅,\nскоро с вами свяжутся', reply_markup=generate_main_menu('Russian 🇷🇺'))
         elif language == 'uz':
-            await message.answer("Sizning arizangiz qabul qilindi ✅,\ntez orada siz bilan bog'lanamiz")
+            await message.answer("Sizning arizangiz qabul qilindi ✅,\ntez orada siz bilan bog'lanamiz", reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
         await state.finish()
     else:
         await message.answer('else 404, no such branch')
@@ -1327,7 +1326,7 @@ async def get_user(user_id, message):
         await message.answer('error 404')
 
 
-@dp.message_handler(regexp='Сменить имя 👌|Ismimni ozgartirish 👌')
+@dp.message_handler(regexp='Сменить имя 👤|Ismimni ozgartirish 👤')
 async def get_new_name(message: Message):
     user_id = message.from_user.id
     language = get_lang_by_id(user_id)

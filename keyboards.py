@@ -86,7 +86,7 @@ def generate_settings_menu(lang):
     if lang == "Russian 🇷🇺":
         return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True).add(*
                                                                           [
-                                                                              KeyboardButton(text='Сменить имя 👌'),
+                                                                              KeyboardButton(text='Сменить имя 👤'),
                                                                               KeyboardButton(text='Изменить адрес 🏘️'),
                                                                               KeyboardButton(text='Изменить лицевой счет 🧮'),
                                                                               KeyboardButton(text='📞 Сменить номер телефона ☎️'),
@@ -96,7 +96,7 @@ def generate_settings_menu(lang):
     elif lang == 'Özbekcha 🇺🇿':
         return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True).add(*
                                                                           [
-                                                                              KeyboardButton(text='Ismimni ozgartirish 👌'),
+                                                                              KeyboardButton(text='Ismimni ozgartirish 👤'),
                                                                               KeyboardButton(text="Manzilni o'zgartirish 🏘️"),
                                                                               KeyboardButton(text="Shaxsiy hisobni o'zgartirish 🧮"),
                                                                               KeyboardButton(text="📞 Telefon raqamini o'zgartirish ☎️"),
