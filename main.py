@@ -448,10 +448,10 @@ async def admin(message: Message):
     elif message.text == '👨🏻‍💻Связатся с Админом 📞':
             await bot.send_contact(chat_id, first_name='Жахонгирака', last_name='1 номер',
                                    phone_number='+998 95 388 88 01',
-                                   reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
+                                   reply_markup=generate_main_menu("Russian 🇷🇺"))
             await bot.send_contact(chat_id, first_name='Жахонгирака', last_name='2 номер',
                                    phone_number='+998 93 505 01 81',
-                                   reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
+                                   reply_markup=generate_main_menu("Russian 🇷🇺"))
 
 
 @dp.message_handler(regexp='Я житель|Men rezidentman')
