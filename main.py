@@ -909,14 +909,12 @@ async def title_send(message: Message, state: FSMContext):
             # await bot.forward_message(chat_id=sender_id, from_chat_id=group, message=f'{message.photo+message.caption }'),
             if lang == ru:
                 await bot.send_photo(chat_id=sender_id, photo=photo_file_id, caption=caption, reply_markup=generate_dov_menu('ru')),
-                await message.answer('Оцените пожалуйста качество сервиса')
+                await bot.send_message(text='Оцените пожалуйста качество сервиса', chat_id=sender_id)
             elif lang == uz:
                 await bot.send_photo(chat_id=sender_id, photo=photo_file_id, caption=caption, reply_markup=generate_dov_menu('uz')),
-                await message.answer("Iltimos, xizmat sifatini baholang")
-
+                await bot.send_message(text="Iltimos, xizmat sifatini baholang", chat_id=sender_id)
             await state.finish()
-            await message.answer('Рассылка отправлена')\
-
+            await message.answer('Yuborildi ✅')
 
 
 @dp.message_handler(commands=['answer'])
@@ -955,7 +953,7 @@ async def title_send(message: Message, state: FSMContext):
             elif lang == uz:
                 await bot.send_message(text=f'{text}',chat_id=sender_id)
             await state.finish()
-            await message.answer('Рассылка отправлена')
+            await message.answer('Yuborildi ✅')
 
 
 
