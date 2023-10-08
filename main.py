@@ -1096,6 +1096,7 @@ async def green(message: Message):
     user_id = message.from_user.id
     lang = get_lang(user_id)
     branch = get_user_branch(user_id)
+    print(branch)
     if branch == ('GreenPark',):
         await bot.send_photo(chat_id=message.from_user.id, photo=InputFile('media/gp.jpg'),
                              caption='+998 90 957 60 56 -\tlift | лифт\n+998 95 388 88 06 -\t santexnik | сантехник\n+998 95 388 88 05 -\t elektrik | электрик\n+998 93 541 22 99 -\t'
