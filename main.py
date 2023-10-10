@@ -32,7 +32,8 @@ admin = get_admins_list()
 # print(admin)
 # print(admin)
 
-boss = (104314498, 1625223180, 1043144098)
+boss = (1043144098, 89645973, 431473067, 6578322428)
+# shaxzod jaxongiraka voxidaka sifat meneger
 # boss = [1043144098]
 # print(boss)
 ru = ('ru',)
@@ -183,7 +184,7 @@ async def load_branch(message: types.Message, state: FSMContext) -> None:
     user_id = message.from_user.id
     language = get_lang_by_id(user_id)
     house_id = message.text
-    if not house_id == 'Пропустить' or house_id == "Oʻtkazib yuborish":
+    if not house_id == 'Пропустить' and not house_id == "Oʻtkazib yuborish":
         if house_id.startswith('139') or house_id.startswith('138'):
             async with state.proxy() as data:
                 data['house_id'] = message.text
@@ -208,7 +209,7 @@ async def load_branch(message: types.Message, state: FSMContext) -> None:
                 await message.reply('А теперь пришлите адрес с указанием дома этажа и номером квартиры!',
                                     reply_markup=types.ReplyKeyboardRemove())
                 await ProfileStatesGroup.next()
-            if language == uz:
+            elif language == uz:
                 await message.answer(
                     "Lekin buni bilib olganingizdan so'ng sozlamalarga shaxsiy hisobingizni qo'shishni unutmang")
                 await message.reply("Endi uyning qavati va xonadon raqamini ko'rsatgan holda manzilni yuboring!",
@@ -399,14 +400,14 @@ async def load_branch(message: types.Message, state: FSMContext) -> None:
 async def delete(message: Message):
     user_id = message.from_user.id
     delete_user(user_id)
-    if not user_id in boss:
+    if user_id in boss:
         delete_user(user_id)
         await message.answer(' ✅', reply_markup=generate_language_menu())
-    elif user_id in boss:
-        text = message.text.strip('delete_admin')[1]
-        delete_user(text)
-        await message.reply('Вы удалили его из базы данных')
-        await message.answer(' ✅', reply_markup=generate_language_menu())
+    # elif user_id in boss:
+    #     text = message.text.strip('delete_admin')[1]
+    #     delete_user(text)
+    #     await message.reply('Вы удалили его из базы данных')
+    #     await message.answer(' ✅', reply_markup=generate_language_menu())
 
 
 @dp.message_handler(commands=['delete_admin'])
@@ -1481,6 +1482,13 @@ async def admin_help(message: Message):
             "/id - пришлет вам ваш телеграмм id\n/register_admin - зарегистрирует админа\n/delete_admin - если напишет сам то удалит себя а если Джахонгир ака то после ввода его id\n/delete - тоже самое, только юзеров\n/sendall- отправит всем что вы напишите кто хотяб просто когда либо нажимал /start\n/send_branch - отправит рассылку на филиал на который вы укажите\n/get_user - вытащит все о юзере из базы данных (надо ввести его Id)\n/get_admin - работает так же как и get_user только с админами")
     # else:
     #     await message.answer('error 404')
+
+
+@dp.message_handler(content_types=['contact'])
+async def contact_id(message: Message):
+    conatctid = message.contact.user_id
+    if message.from_user.id in boss:
+        await message.answer(f'{conatctid}')
 
 
 executor.start_polling(dp)
