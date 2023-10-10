@@ -1022,7 +1022,7 @@ async def process_request(message: Message, state: FSMContext):
         text = f"---Rezidentdan xizmat ko'rsatishni so'rash---\n"
         text += f'Ism: {full_name}\n'
         text += f'Yuzer: @{user_name}\n'
-        text += f'ID: {user_id}\n'
+        text += f'ID: \n{user_id}\n'
         text += f'Telefon raqami: +{phone}\n'
         text += f"Til: {language}\n"
         text += f"Manzil: {address}\n"
