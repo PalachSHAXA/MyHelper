@@ -642,12 +642,12 @@ async def service(message: Message):
 async def santexnik(message: Message, state: FSMContext):
     if message.text == '🪠Santexnik 👨‍🔧':
         caption = 'Chap tomonda xizmat kodi mavjud'
-        await message.answer_photo(InputFile('media/sss.png'), caption=caption)
+        await message.answer_photo(InputFile('media/usu.png'), caption=caption)
         await message.answer("Bu bizning santexnika xizmatlarimiz, ro'yxatdan o'tmoqchimisiz?",
                              reply_markup=generate_yes_no_menu('Özbekcha 🇺🇿'))
     elif message.text == '👨‍🔧 Сантехник 🪠':
         caption = 'Слева находится код сервиса'
-        await message.answer_photo(InputFile('media/usu.png'), caption=caption)
+        await message.answer_photo(InputFile('media/sss.png'), caption=caption)
         await message.answer(
             'Это наши сервисы сантехника, хотите оформить ?',
             reply_markup=generate_yes_no_menu('Russian 🇷🇺'))
