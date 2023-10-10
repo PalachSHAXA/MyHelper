@@ -183,7 +183,7 @@ async def load_branch(message: types.Message, state: FSMContext) -> None:
     user_id = message.from_user.id
     language = get_lang_by_id(user_id)
     house_id = message.text
-    if not house_id == 'Пропустить' or house_id == "Oʻtkazib yuborish":
+    if not house_id == 'Пропустить' and not house_id == "Oʻtkazib yuborish":
         if house_id.startswith('139') or house_id.startswith('138'):
             async with state.proxy() as data:
                 data['house_id'] = message.text
@@ -208,7 +208,7 @@ async def load_branch(message: types.Message, state: FSMContext) -> None:
                 await message.reply('А теперь пришлите адрес с указанием дома этажа и номером квартиры!',
                                     reply_markup=types.ReplyKeyboardRemove())
                 await ProfileStatesGroup.next()
-            if language == uz:
+            elif language == uz:
                 await message.answer(
                     "Lekin buni bilib olganingizdan so'ng sozlamalarga shaxsiy hisobingizni qo'shishni unutmang")
                 await message.reply("Endi uyning qavati va xonadon raqamini ko'rsatgan holda manzilni yuboring!",
@@ -399,14 +399,14 @@ async def load_branch(message: types.Message, state: FSMContext) -> None:
 async def delete(message: Message):
     user_id = message.from_user.id
     delete_user(user_id)
-    if not user_id in boss:
+    if user_id in boss:
         delete_user(user_id)
         await message.answer(' ✅', reply_markup=generate_language_menu())
-    elif user_id in boss:
-        text = message.text.strip('delete_admin')[1]
-        delete_user(text)
-        await message.reply('Вы удалили его из базы данных')
-        await message.answer(' ✅', reply_markup=generate_language_menu())
+    # elif user_id in boss:
+    #     text = message.text.strip('delete_admin')[1]
+    #     delete_user(text)
+    #     await message.reply('Вы удалили его из базы данных')
+    #     await message.answer(' ✅', reply_markup=generate_language_menu())
 
 
 @dp.message_handler(commands=['delete_admin'])
