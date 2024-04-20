@@ -48,6 +48,11 @@ class ProfileStatesGroup(StatesGroup):
     address = State()
 
 
+class ClientsGroup(StatesGroup):
+    name = State()
+    contact = State()
+
+
 class AdminsGroup(StatesGroup):
     name = State()
     user_name = State()
@@ -88,7 +93,13 @@ class NewStateGroup(StatesGroup):
 @dp.message_handler(commands=['start'])
 async def command_start(message: Message):
     chat_id = message.from_user.id
-    await bot.send_message(chat_id, 'Выберите язык | Tilni tanlang', reply_markup=generate_language_menu())
+    user = first_select_users(chat_id)
+    if user:
+        await message.answer('')
+
+    else:
+
+        await bot.send_message(chat_id, 'Выберите язык | Tilni tanlang', reply_markup=generate_language_menu())
 
 
 none = (None,)
@@ -708,7 +719,7 @@ async def dalshe(message: Message):
         await NewStateGroup.guest.set()
     elif lang == ('ru',):
         await message.answer(
-            'Чтобы узнать подезд этаж  и номер квартиры спроси те номер дицевого счета к кому вы едите, и пришлите его мне\n!(Важно чтоб он/она была зарегестрирована)!')
+            'Чтобы узнать подъезд этаж  и номер квартиры спросите номер лицевого счета к кому вы едите, и пришлите его мне\n!(Важно чтоб он/она была зарегестрирована)!')
         await NewStateGroup.guest.set()
 
 
@@ -1490,5 +1501,60 @@ async def contact_id(message: Message):
     if message.from_user.id in boss:
         await message.answer(f'{conatctid}')
 
+
+@dp.message_handler(regexp='Клиент|Haridor')
+async def client_reg(message: Message):
+    user_name = message.from_user.username
+    print(user_name)
+    # chat_id = message.chat
+    user_id = message.from_user.id
+    name = message.from_user.full_name
+    ru = 'ru'
+    uz = 'uz'
+    if message.text == 'Клиент':
+        register_client_lang(user_id, name, ru, user_name)
+        await message.answer("Уважаемый клиент, чтобы воспользоваться услугами MyHelper, нам необходимо пройти небольшую регистрацию.")
+        await message.answer("Начинаем малую регистрацию,\nпришлите свое имя", reply_markup=generate_name(name))
+        await ClientsGroup.name.set()
+    else:
+        register_client_lang(user_id, name, uz, user_name)
+        await message.answer("Hurmatli mijoz, MyHelper xizmatlaridan foydalanish uchun kichik ro'yxatdan o'tamiz.")
+        await message.answer("Biz kichik ro'yxatga olishni boshlaymiz,\nismingizni yuboring", reply_markup=generate_name(name))
+        await ClientsGroup.name.set()
+
+
+@dp.message_handler(state=ClientsGroup.name)
+async def client_name(message: Message, state: FSMContext):
+    user_id = message.from_user.id
+    lang = get_client_lang(user_id)
+    print('uuu')
+    async with state.proxy() as data:
+        data['name'] = message.text
+    if lang == ru:
+        await message.answer(f'{message.text} теперь отправьте пожалуйуста ваш номер', reply_markup=generate_phone("Russian 🇷🇺"))
+        await ClientsGroup.next()
+    elif lang == uz:
+        await message.answer(f'{message.text} endi nomerizni yuboring', reply_markup=generate_phone('Özbekcha 🇺🇿'))
+        await ClientsGroup.next()
+
+
+@dp.message_handler(state =ClientsGroup.contact, content_types=['contact'])
+async def reg_phone(message: Message, state:FSMContext):
+    user_id = message.from_user.id
+    async with state.proxy() as data:
+        data['contact'] = message.contact.phone_number
+        lang = get_client_lang(user_id)
+    if lang == ru:
+        await message.answer(f'{message.text} наша минни регистрация прошла успешно теперь можете пользоваться услугами MyHelper', reply_markup=generate_service_menu("Russian 🇷🇺"))
+        await ClientsGroup.next()
+    elif lang == uz:
+        await message.answer(f"{message.text} bizning minnie ro'yxatdan o'tishimiz muvaffaqiyatli o'tdi, endi siz MyHelper xizmatlaridan foydalanishingiz mumkin ", reply_markup=generate_service_menu('Özbekcha 🇺🇿'))
+        await ClientsGroup.next()
+
+
+#          data['house_id'] = message.text
+
+       # async with state.proxy() as data:
+       #          data['house_id'] = message.text
 
 executor.start_polling(dp)

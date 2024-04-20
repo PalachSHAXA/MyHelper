@@ -19,6 +19,18 @@ def create_users_table():
     )
     ''')
 
+def create_clients_table():
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS clients(
+        user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        full_name TEXT,
+        user_name TEXT,
+        telegram_id BIGINT NOT NULL UNIQUE, 
+        phone TEXT,
+        language TEXT DEFAULT uz
+    )
+    ''')
+
 
 def create_admins_table():
     cursor.execute('''
@@ -32,15 +44,23 @@ def create_admins_table():
     )
     ''')
 # todo команда обсуживающея 1/2 2/2
-
-
-create_users_table()
-create_admins_table()
-
-
 def delete():
     cursor.execute('''
      DROP TABLE IF EXISTS users''')
+
+
+def delete_clients():
+    cursor.execute('''
+     DROP TABLE IF EXISTS clients''')
+
+# create_users_table()
+# create_admins_table()
+delete_clients()
+create_clients_table()
+
+
+
+
 
 
 database.commit()

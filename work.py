@@ -51,6 +51,16 @@ def get_lang_by_id(user_id):
     return result
 
 
+def get_client_lang(user_id):
+    database = sqlite3.connect('myhelper.db')
+    cursor = database.cursor()
+    cursor.execute("SELECT language FROM clients WHERE telegram_id=?", (user_id,))
+    result = cursor.fetchone()
+    database.commit()
+    database.close()
+    return result
+
+
 def update_name(name: str, user_id: int):
     database = sqlite3.connect('myhelper.db')
     cursor = database.cursor()
@@ -68,6 +78,18 @@ def update_lang(lang: str, user_id: int):
     cursor = database.cursor()
     cursor.execute(f'''
     UPDATE users
+    SET language = '{lang}'
+    WHERE telegram_id = ?
+    ''', (user_id, ))
+    database.commit()
+    database.close()
+
+
+def update_client_lang(lang: str, user_id: int):
+    database = sqlite3.connect('myhelper.db')
+    cursor = database.cursor()
+    cursor.execute(f'''
+    UPDATE clients
     SET language = '{lang}'
     WHERE telegram_id = ?
     ''', (user_id, ))
@@ -147,6 +169,17 @@ def register_lang(chat_id, full_name, language):
     database.close()
 
 
+def register_client_lang(chat_id, full_name, language, user_name):
+    database = sqlite3.connect('myhelper.db')
+    cursor = database.cursor()
+    cursor.execute('''
+    INSERT INTO clients(telegram_id, full_name, language, user_name)
+     VALUES (?, ?, ?, ?)
+    ''', (chat_id, full_name, language, user_name))
+    database.commit()
+    database.close()
+
+
 def get_phone(chat_id):
     database = sqlite3.connect('myhelper.db')
     cursor = database.cursor()
@@ -162,6 +195,17 @@ def get_phone(chat_id):
 
 
 def register_user(phone, address, house_id, telegram_id):
+    database = sqlite3.connect('myhelper.db')
+    cursor = database.cursor()
+    cursor.execute(f'''
+    INSERT INTO users(phone, address, house_id)
+     WHERE telegram_id = {telegram_id} VALUES (?, ?, ?, ?)
+    ''', (phone, address, house_id, telegram_id))
+    database.commit()
+    database.close()
+
+
+def register_client(phone, address, house_id, telegram_id):
     database = sqlite3.connect('myhelper.db')
     cursor = database.cursor()
     cursor.execute(f'''

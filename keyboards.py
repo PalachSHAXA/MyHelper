@@ -261,21 +261,21 @@ def generate_id(id):
 
 
 def generate_name(name):
-        return ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(*
+    return ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(*
                                                                           [
                                                                               KeyboardButton(text=f'{name}'),
                                                                           ])
 
 
 def generate_user_name(user):
-        return ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(*
+    return ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(*
                                                                           [
                                                                               KeyboardButton(text=f'@{user}'),
                                                                           ])
 
 
 def generate_admin_work():
-        return ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(*
+    return ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(*
                                                                           [
                                                                               KeyboardButton(text=f'Электрик'),
                                                                               KeyboardButton(text=f'Сантехник'),
@@ -284,7 +284,7 @@ def generate_admin_work():
 
 
 def generate_branch():
-        return ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(*
+    return ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(*
                                                                           [
                                                                               KeyboardButton(text=f'1/2'),
                                                                               KeyboardButton(text=f'2/2'),
@@ -345,6 +345,7 @@ def generate_later(lang):
                                                                                                   [
                                                                                                       # KeyboardButton(text='Потом'),
                                                                                                       KeyboardButton(text='/register'),
+                                                                                                      KeyboardButton(text='Клиент'),
                                                                                                       KeyboardButton(text='Гость')
 
 
@@ -355,6 +356,7 @@ def generate_later(lang):
                                                                                                   [
                                                                                                       # KeyboardButton(text='Keyin'),
                                                                                                       KeyboardButton(text='/register'),
+                                                                                                      KeyboardButton(text='Haridor'),
                                                                                                       KeyboardButton(text='Mehmon')
 
 
