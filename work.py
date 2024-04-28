@@ -11,6 +11,16 @@ def get_phone_and_address_by_id(user_id):
     return result
 
 
+def get_client_info(user_id):
+    database = sqlite3.connect('myhelper.db')
+    cursor = database.cursor()
+    cursor.execute("SELECT full_name, phone, language, user_name FROM clients WHERE telegram_id=?", (user_id,))
+    result = cursor.fetchone()
+    database.commit()
+    database.close()
+    return result
+
+
 def get_info_iuser_id(user_id):
     database = sqlite3.connect('myhelper.db')
     cursor = database.cursor()
@@ -73,6 +83,18 @@ def update_name(name: str, user_id: int):
     database.close()
 
 
+def update_client_name(name: str, user_id: int):
+    database = sqlite3.connect('myhelper.db')
+    cursor = database.cursor()
+    cursor.execute(f'''
+    UPDATE clients
+    SET full_name = '{name}'
+    WHERE telegram_id = ?
+    ''', (user_id, ))
+    database.commit()
+    database.close()
+
+
 def update_lang(lang: str, user_id: int):
     database = sqlite3.connect('myhelper.db')
     cursor = database.cursor()
@@ -83,6 +105,22 @@ def update_lang(lang: str, user_id: int):
     ''', (user_id, ))
     database.commit()
     database.close()
+
+
+def get_client(user_id):
+    database = sqlite3.connect('myhelper.db')
+    cursor = database.cursor()
+    cursor.execute("SELECT phone FROM clients WHERE telegram_id = ?", (user_id,))
+    clients = cursor.fetchone()
+    return clients
+
+
+def get_resident(user_id):
+    database = sqlite3.connect('myhelper.db')
+    cursor = database.cursor()
+    cursor.execute("SELECT phone FROM users WHERE telegram_id = ?", (user_id,))
+    resident = cursor.fetchone()
+    return resident
 
 
 def update_client_lang(lang: str, user_id: int):
@@ -102,6 +140,16 @@ def first_select_users(user_id: int):
     cursor = database.cursor()
     cursor.execute(f'''
     SELECT * FROM users WHERE telegram_id = ?
+    ''', (user_id, ))
+    database.commit()
+    database.close()
+
+
+def first_select_clients(user_id: int):
+    database = sqlite3.connect('myhelper.db')
+    cursor = database.cursor()
+    cursor.execute(f'''
+    SELECT * FROM clients WHERE telegram_id = ?
     ''', (user_id, ))
     database.commit()
     database.close()
@@ -132,6 +180,18 @@ def update_phone(phone: int, user_id: int):
     database.close()
 
 
+def update_client_phone(phone: int, user_id: int):
+    database = sqlite3.connect('myhelper.db')
+    cursor = database.cursor()
+    cursor.execute(f'''
+    UPDATE clients
+    SET phone = '{phone}'
+    WHERE telegram_id = ?
+    ''', (user_id, ))
+    database.commit()
+    database.close()
+
+
 def request(name: str, user_id: int, address: str, phone: int):
     database = sqlite3.connect('myhelper.db')
     cursor = database.cursor()
@@ -155,7 +215,70 @@ def update_data(name: str, user_id: int, address: str, branch, phone: int, house
     ''', (user_id, ))
     database.commit()
     database.close()
+
+
+def update_client_data(name: str, user_id: int,phone: int):
+    database = sqlite3.connect('myhelper.db')
+    cursor = database.cursor()
+    cursor.execute(f'''
+    UPDATE clients
+    SET full_name = '{name}', phone = '{phone}'
+    WHERE telegram_id = ?
+    ''', (user_id, ))
+    database.commit()
+    database.close()
 # {name}{address}{phone}{house_id}
+
+
+def get_type(user_id):
+    database = sqlite3.connect('myhelper.db')
+    cursor = database.cursor()
+
+    cursor.execute("SELECT * FROM clients WHERE telegram_id = ?", (user_id,))
+    client = cursor.fetchone()
+
+    cursor.execute("SELECT * FROM users WHERE telegram_id = ?", (user_id,))
+    resident = cursor.fetchone()
+
+    if client is not None and all(client):
+        return 'client'
+    elif resident is not None and all(resident):
+        return 'resident'
+    else:
+        return 'unknown'
+
+    # print("-------------")
+    # print(clients)
+    # print(resident)
+    # print(clients is None)
+    # print(resident is None)
+
+
+def get_client(user_id):
+    database = sqlite3.connect('myhelper.db')
+    cursor = database.cursor()
+    cursor.execute("SELECT phone FROM clients WHERE telegram_id = ?", (user_id,))
+    clients = cursor.fetchone()
+    return clients
+
+
+def get_resident(user_id):
+    database = sqlite3.connect('myhelper.db')
+    cursor = database.cursor()
+    cursor.execute("SELECT phone FROM users WHERE telegram_id = ?", (user_id,))
+    resident = cursor.fetchone()
+    return resident
+
+    # print(result_clients)
+
+
+# def get_resident(user_id):
+#     database = sqlite3.connect('myhelper.db')
+#     cursor = database.cursor()
+#     cursor.execute("SELECT phone FROM users WHERE telegram_id = ?", (user_id,))
+#     resident = cursor.fetchone()
+#     return resident
+    # print(resident)
 
 
 def register_lang(chat_id, full_name, language):
@@ -412,7 +535,7 @@ def get_master(master: str, branch):
     ''', (master, branch))
     mas = cursor.fetchall()
     for row in mas:
-        print(row[0])
+       print(row[0])
     database.commit()
     database.close()
     return mas
@@ -446,6 +569,14 @@ def delete_user(user_id: int):
     database = sqlite3.connect('myhelper.db')
     cursor = database.cursor()
     cursor.execute("DELETE FROM users WHERE telegram_id = ?", (user_id,))
+    database.commit()
+    database.close()
+
+
+def delete_client(user_id: int):
+    database = sqlite3.connect('myhelper.db')
+    cursor = database.cursor()
+    cursor.execute("DELETE FROM clients WHERE telegram_id = ?", (user_id,))
     database.commit()
     database.close()
 

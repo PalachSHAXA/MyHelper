@@ -38,7 +38,7 @@ def create_admins_table():
         full_name TEXT,
         user_name TEXT,
         telegram_id BIGINT NOT NULL UNIQUE, 
-        phone TEXT,
+        phone TEXT,x
         master TEXT,
         branch TEXT
     )
@@ -47,6 +47,8 @@ def create_admins_table():
 def delete():
     cursor.execute('''
      DROP TABLE IF EXISTS users''')
+    cursor.execute('''
+     DROP TABLE IF EXISTS clients''')
 
 
 def delete_clients():
@@ -55,7 +57,7 @@ def delete_clients():
 
 # create_users_table()
 # create_admins_table()
-delete_clients()
+# delete_clients()
 create_clients_table()
 
 

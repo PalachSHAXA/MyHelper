@@ -1,10 +1,9 @@
 ﻿import logging
-from aiogram.types import Message, InputFile, chat
+from aiogram.types import InputFile
 from aiogram.utils import executor
 from dotenv import load_dotenv
-from database import *
 from keyboards import *
-from settings import GROUP_ID, ADMIN_ID
+from settings import GROUP_ID
 from work import *
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -93,12 +92,27 @@ class NewStateGroup(StatesGroup):
 @dp.message_handler(commands=['start'])
 async def command_start(message: Message):
     chat_id = message.from_user.id
-    user = first_select_users(chat_id)
-    if user:
-        await message.answer('')
-
+    print(chat_id)
+    typo = get_type(chat_id)
+    print(typo)
+    print(typo == 'client')
+    if typo == 'client':
+        lang = get_client_lang(chat_id)
+        if lang == ru:
+            await message.answer('Вы вернулись в главное меню:',
+                                 reply_markup=generate_main_menu('Russian 🇷🇺', 'client'))
+        elif lang == uz:
+            await message.answer('Siz asosiy menyuga qaytasiz:',
+                                 reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'client'))
+    elif typo == 'resident':
+        lang = get_lang(chat_id)
+        if lang == ru:
+            await message.answer('Вы вернулись в главное меню:',
+                                 reply_markup=generate_main_menu('Russian 🇷🇺', 'resident'))
+        elif lang == uz:
+            await message.answer('Siz asosiy menyuga qaytasiz:',
+                                 reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'resident'))
     else:
-
         await bot.send_message(chat_id, 'Выберите язык | Tilni tanlang', reply_markup=generate_language_menu())
 
 
@@ -130,11 +144,11 @@ async def cmd_create(message: types.Message) -> None:
     elif not address == ('None',) or address is None or address == none:
         if language == ru:
             await message.answer('Вы уже зарегистрированы, вы можете изменить данные с настроек',
-                                 reply_markup=generate_settings_menu("Russian 🇷🇺"))
+                                 reply_markup=generate_settings_menu("Russian 🇷🇺", 'resident'))
         elif language == uz:
             await message.answer(
                 "Siz allaqachon ro'yxatdan o'tgansiz, sozlamalardan ma'lumotlarni o'zgartirishingiz mumkin",
-                reply_markup=generate_settings_menu("Özbekcha 🇺🇿"))
+                reply_markup=generate_settings_menu("Özbekcha 🇺🇿", 'resident'))
 
 
 @dp.message_handler(state=ProfileStatesGroup.name)
@@ -253,11 +267,11 @@ async def load_address(message: types.Message, state: FSMContext) -> None:
             if language == ru:
                 await message.reply(
                     f"Имя: {name},\nТелефон номер: +{phone}\nЮзер @{user_name}\nМесто проживания: {branch},\nЛицевой счет: {no},\nАдрес:{address}\nЕсли вы что то указали не верно то его можно изменить в настройках",
-                    reply_markup=generate_main_menu('Russian 🇷🇺'))
+                    reply_markup=generate_main_menu('Russian 🇷🇺', 'resident'))
             elif language == uz:
                 await message.reply(
                     f"Ism: {name},\nTelefon raqami: +{phone}\nYuzer @{user_name}\nYashash joyi: {branch},\nShaxsiy hisob: {no},\nManzil: {address}\nAgar biror narsani noto'g'ri ko'rsatgan bo'lsangiz, uni sozlamalarda o'zgartirishingiz mumkin",
-                    reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
+                    reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'resident'))
             if language == ru:
                 await message.reply('Ваша анкета успешно создана!')
                 await state.finish()
@@ -268,11 +282,11 @@ async def load_address(message: types.Message, state: FSMContext) -> None:
             if language == ru:
                 await message.reply(
                     f"Имя: {name},\nТелефон номер: +{phone}\nЮзер @{user_name}\nМесто проживания: {branch},\nЛицевой счет: {house_id},\nАдрес:{address}\nЕсли вы что то указали не верно то его можно изменить в настройках",
-                    reply_markup=generate_main_menu('Russian 🇷🇺'))
+                    reply_markup=generate_main_menu('Russian 🇷🇺', 'resident'))
             elif language == uz:
                 await message.reply(
                     f"Ism: {name},\nTelefon raqami: +{phone}\nYuzer @{user_name}\nYashash joyi: {branch},\nShaxsiy hisob: {house_id},\nManzil: {address}\nAgar biror narsani noto'g'ri ko'rsatgan bo'lsangiz, uni sozlamalarda o'zgartirishingiz mumkin",
-                    reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
+                    reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'resident'))
             if language == ru:
                 await message.reply('Ваша анкета успешно создана!')
                 await state.finish()
@@ -410,9 +424,11 @@ async def load_branch(message: types.Message, state: FSMContext) -> None:
 @dp.message_handler(commands=['delete'])
 async def delete(message: Message):
     user_id = message.from_user.id
-    delete_user(user_id)
+    # delete_user(user_id)
+    # delete_client(user_id)
     if user_id in boss:
         delete_user(user_id)
+        delete_client(user_id)
         await message.answer(' ✅', reply_markup=generate_language_menu())
     # elif user_id in boss:
     #     text = message.text.strip('delete_admin')[1]
@@ -452,18 +468,37 @@ async def get_user_id(message: Message):
 @dp.message_handler(regexp='👨🏻‍💻Admin bilan boglanish📞|👨🏻‍💻Связатся с Админом 📞')
 async def admin(message: Message):
     chat_id = message.from_user.id
-    if message.text == '👨🏻‍💻Admin bilan boglanish📞':
-        await bot.send_contact(chat_id, first_name='Jahongiraka', last_name='1 nomer', phone_number='+998 95 388 88 01',
-                               reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
-        await bot.send_contact(chat_id, first_name='Jahongiraka', last_name='2 nomer', phone_number='+998 93 505 01 81',
-                               reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
-    elif message.text == '👨🏻‍💻Связатся с Админом 📞':
+    typo = get_type(chat_id)
+    if typo == 'resident':
+        if message.text == '👨🏻‍💻Admin bilan boglanish📞':
+            await bot.send_contact(chat_id, first_name='Jahongiraka', last_name='1 nomer',
+                                   phone_number='+998 95 388 88 01',
+                                   reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'resident'))
+            await bot.send_contact(chat_id, first_name='Jahongiraka', last_name='2 nomer',
+                                   phone_number='+998 93 505 01 81',
+                                   reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'resident'))
+        elif message.text == '👨🏻‍💻Связатся с Админом 📞':
             await bot.send_contact(chat_id, first_name='Жахонгирака', last_name='1 номер',
                                    phone_number='+998 95 388 88 01',
-                                   reply_markup=generate_main_menu("Russian 🇷🇺"))
+                                   reply_markup=generate_main_menu("Russian 🇷🇺", 'resident'))
             await bot.send_contact(chat_id, first_name='Жахонгирака', last_name='2 номер',
                                    phone_number='+998 93 505 01 81',
-                                   reply_markup=generate_main_menu("Russian 🇷🇺"))
+                                   reply_markup=generate_main_menu("Russian 🇷🇺", 'resident'))
+    elif typo == 'client':
+        if message.text == '👨🏻‍💻Admin bilan boglanish📞':
+            await bot.send_contact(chat_id, first_name='Jahongiraka', last_name='1 nomer',
+                                   phone_number='+998 95 388 88 01',
+                                   reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'client'))
+            await bot.send_contact(chat_id, first_name='Jahongiraka', last_name='2 nomer',
+                                   phone_number='+998 93 505 01 81',
+                                   reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'client'))
+        elif message.text == '👨🏻‍💻Связатся с Админом 📞':
+            await bot.send_contact(chat_id, first_name='Жахонгирака', last_name='1 номер',
+                                   phone_number='+998 95 388 88 01',
+                                   reply_markup=generate_main_menu("Russian 🇷🇺", 'client'))
+            await bot.send_contact(chat_id, first_name='Жахонгирака', last_name='2 номер',
+                                   phone_number='+998 93 505 01 81',
+                                   reply_markup=generate_main_menu("Russian 🇷🇺", 'client'))
 
 
 @dp.message_handler(regexp='Я житель|Men rezidentman')
@@ -475,9 +510,9 @@ async def inhabitant(message: Message):
         await cmd_create(message)
     else:
         if lang == ru:
-            await generate_main_menu('Russian 🇷🇺')
+            await generate_main_menu('Russian 🇷🇺', 'resident')
         elif lang == uz:
-            await generate_main_menu('Özbekcha 🇺🇿')
+            await generate_main_menu('Özbekcha 🇺🇿', 'resident')
 
 
 @dp.message_handler(regexp='Гость|Mehmon')
@@ -488,7 +523,7 @@ async def guest(message: Message, state: FSMContext):
         await message.answer("Iltimos kelayotgan odamingizni filialini talang",
                              reply_markup=generate_branch_menu())
         await NewStateGroup.branch.set()
-                             # reply_markup=generate_back_menu('Özbekcha 🇺🇿'))
+        # reply_markup=generate_back_menu('Özbekcha 🇺🇿'))
     if lang == ('ru',):
         await message.answer('Пожалуйста выберите филиал к кому вы едите', reply_markup=generate_branch_menu())
         await NewStateGroup.branch.set()
@@ -504,7 +539,8 @@ async def loc(message: Message, state: FSMContext):
         await bot.send_location(message.chat.id, latitude=41.305242, longitude=69.324845)
         await state.finish()
         if lang == ru:
-            await message.answer('Вот локация место проживания людей живуших в GreenPark', reply_markup=generate_back_menu('ru'))
+            await message.answer('Вот локация место проживания людей живуших в GreenPark',
+                                 reply_markup=generate_back_menu('ru'))
         elif lang == uz:
             await message.answer('GreenPark aholisning turar joy lakatsiyasi', reply_markup=generate_back_menu('uz'))
     elif branch == 'Adliya':
@@ -518,7 +554,6 @@ async def loc(message: Message, state: FSMContext):
             await message.answer('Adliya aholisning turar joy lakatsiyasi', reply_markup=generate_back_menu('uz'))
 
     # 41.304994, 69.322362
-
 
     # await send_location(message)
 
@@ -548,6 +583,8 @@ async def skip(message: Message, state: FSMContext):
     elif lang == uz:
         await message.answer("Shaxsiy hisobingizni aniqlaganingizdan so'ng, uni sozlamalarga qo'shing")
     await ProfileStatesGroup.next()
+
+
 # ✅
 
 
@@ -558,19 +595,27 @@ async def set_language(message: Message):
     name = message.from_user.full_name
     house_id = get_home_id(user_id)
     lang = 'ru'
-    user = first_select_users(user_id)
+    typo = get_type(user_id)
     address = get_address(user_id)
     if message.text == 'Русский 🇷🇺':
-        if user:
-            update_lang(lang, user_id)
-            await bot.send_message(user_id,
-                                   'Вы на главном меню',
-                                   reply_markup=generate_main_menu('Russian 🇷🇺')
-                                   )
-        if address == ('None',) or address == none or address is None:
+        if not typo == 'unknown':
+            if typo == 'resident':
+                update_lang(lang, user_id)
+                await bot.send_message(user_id,
+                                       'Вы на главном меню',
+                                       reply_markup=generate_main_menu('Russian 🇷🇺', 'resident')
+                                       )
+            elif typo == 'client':
+                update_client_lang(lang, user_id)
+                await bot.send_message(user_id,
+                                       'Вы на главном меню',
+                                       reply_markup=generate_main_menu('Russian 🇷🇺', 'client')
+                                       )
+        elif address == ('None',) or address == none or address is None:
             lang = 'ru'
             language = get_lang(user_id)
             if language == ru:
+
                 await bot.send_message(user_id,
                                        'Здравствуйте, вас приветсвует бот Упровляюшей компании My helper, для продолжения '
                                        'пожалуйуста авторизируйтесь, /register',
@@ -590,22 +635,39 @@ async def set_language(message: Message):
             update_lang(lang, user_id)
             await bot.send_message(user_id,
                                    'Вы на главном меню',
-                                   reply_markup=generate_main_menu('Russian 🇷🇺')
+                                   reply_markup=generate_main_menu('Russian 🇷🇺', 'resident')
                                    )
     elif message.text == 'Özbekcha 🇺🇿':
         lang = 'uz'
-        if address == ('None',) or address == none or address is None:
+        if not typo == 'unknown':
+            typo = get_type(user_id)
+            if typo == 'resident':
+                update_lang(lang, user_id)
+                await bot.send_message(user_id,
+                                       'Siz asosiy menyudasiz',
+                                       reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'resident')
+                                       )
+            elif typo == 'client':
+                update_client_lang(lang, user_id)
+                await bot.send_message(user_id,
+                                       'Siz asosiy menyudasiz',
+                                       reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'client')
+                                       )
+        elif address == ('None',) or address == none or address is None:
+            lang = 'uz'
             language = get_lang(user_id)
             if language == uz:
-                # register_lang(user_id, name, lang)
+
                 await bot.send_message(user_id,
                                        'Assalomu aleykum sizni  “My helper” boshqaruv kompaniyasi boti kutib oldi,\n iltimos registratsiyadan /register',
-                                       reply_markup=generate_later("Özbekcha 🇺🇿"))
+                                       reply_markup=generate_later("Özbekcha 🇺🇿")
+                                       )
             else:
                 register_lang(user_id, name, lang)
                 await bot.send_message(user_id,
                                        'Assalomu aleykum sizni  “My helper” boshqaruv kompaniyasi boti kutib oldi,\n iltimos registratsiyadan /register',
-                                       reply_markup=generate_later("Özbekcha 🇺🇿"))
+                                       reply_markup=generate_later("Özbekcha 🇺🇿")
+                                       )
         elif address == adrs:
             update_lang(lang, user_id)
             await guest(message)
@@ -613,41 +675,89 @@ async def set_language(message: Message):
             update_lang(lang, user_id)
             await bot.send_message(user_id,
                                    'Siz asosiy menyudasiz',
-                                   reply_markup=generate_main_menu('Özbekcha 🇺🇿')
+                                   reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'resident')
                                    )
 
 
 @dp.message_handler(regexp='⬅|🔙')
 async def back(message: Message):
     user_id = message.from_user.id
+    typo = get_type(user_id)
     lang = get_lang(user_id)
-    if lang == ru:
-        if message.text == '🔙':
-            await message.answer('Вы вернулись в главное меню:', reply_markup=generate_main_menu('Russian 🇷🇺'))
-    elif lang == uz:
-        if message.text == '⬅':
+    if message.text == '🔙':
+        if typo == 'client':
+            await message.answer('Вы вернулись в главное меню:',
+                                 reply_markup=generate_main_menu('Russian 🇷🇺', 'client'))
+        elif typo == 'resident':
+            await message.answer('Вы вернулись в главное меню:',
+                                 reply_markup=generate_main_menu('Russian 🇷🇺', 'resident'))
+    elif message.text == '⬅':
+        if typo == 'client':
             await message.answer('Siz asosiy menyuga qaytasiz:',
-                                 reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
+                                 reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'client'))
+        elif typo == 'resident':
+            await message.answer('Siz asosiy menyuga qaytasiz:',
+                                 reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'resident'))
+
+
+# if typo is 'client':
+#     if lang == ru:
+#         if message.text == '🔙':
+#             await message.answer('Вы вернулись в главное меню:',
+#                                  reply_markup=generate_main_menu('Russian 🇷🇺', 'client'))
+#     elif lang == uz:
+#         # if message.text == '⬅':
+#             await message.answer('Siz asosiy menyuga qaytasiz:',
+#                                  reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'client'))
+# elif typo is 'resident':
+#     if lang == ru:
+#         # if message.text == '🔙':
+#             await message.answer('Вы вернулись в главное меню:',
+#                                  reply_markup=generate_main_menu('Russian 🇷🇺', 'resident'))
+#     elif lang == uz:
+#         # if message.text == '⬅':
+#             await message.answer('Siz asosiy menyuga qaytasiz:',
+#                                  reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'resident'))
 
 
 @dp.message_handler(regexp='Вернутся на главное меню|Asosiy menyuga qaytish')
 async def bbb(message: Message):
     user_id = message.from_user.id
-    lang = get_lang(user_id)
-    if lang == ('ru',):
-        await message.answer('Вы вернулись в главное меню:', reply_markup=generate_main_menu('Russian 🇷🇺'))
-    elif lang == ('uz',):
-        await message.answer('Siz asosiy menyuga qaytasiz:',
-                             reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
+    typo = get_type(user_id)
+    if typo == 'resident':
+        lang = get_lang(user_id)
+        if lang == ('ru',):
+            await message.answer('Вы вернулись в главное меню:',
+                                 reply_markup=generate_main_menu('Russian 🇷🇺', 'resident'))
+        elif lang == ('uz',):
+            await message.answer('Siz asosiy menyuga qaytasiz:',
+                                 reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'resident'))
+    elif typo == 'client':
+        lang = get_lang(user_id)
+        if lang == ('ru',):
+            await message.answer('Вы вернулись в главное меню:',
+                                 reply_markup=generate_main_menu('Russian 🇷🇺', 'client'))
+        elif lang == ('uz',):
+            await message.answer('Siz asosiy menyuga qaytasiz:',
+                                 reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'client'))
 
 
 @dp.message_handler(regexp='Выбрать сервис ⛑️|Xizmatni tanlang ⛑️')
 async def service(message: Message):
-    if message.text == 'Выбрать сервис ⛑️':
-        await message.answer('Выберите одно из сервисов:', reply_markup=generate_service_menu('Russian 🇷🇺'))
-    elif message.text == 'Xizmatni tanlang ⛑️':
-        await message.answer('Xizmatlardan birini tanlang:',
-                             reply_markup=generate_service_menu('Özbekcha 🇺🇿'))
+    user_id = message.from_user.id
+    typo = get_type(user_id)
+    if typo == 'resident':
+        if message.text == 'Выбрать сервис ⛑️':
+            await message.answer('Выберите одно из сервисов:', reply_markup=generate_service_menu('Russian 🇷🇺', 'resident'))
+        elif message.text == 'Xizmatni tanlang ⛑️':
+            await message.answer('Xizmatlardan birini tanlang:',
+                                 reply_markup=generate_service_menu('Özbekcha 🇺🇿', 'resident'))
+    elif typo == 'client':
+        if message.text == 'Выбрать сервис ⛑️':
+            await message.answer('Выберите одно из сервисов:', reply_markup=generate_service_menu('Russian 🇷🇺', 'client'))
+        elif message.text == 'Xizmatni tanlang ⛑️':
+            await message.answer('Xizmatlardan birini tanlang:',
+                                 reply_markup=generate_service_menu('Özbekcha 🇺🇿', 'client'))
 
 
 @dp.message_handler(regexp='👨‍🔧 Сантехник 🪠|🪠Santexnik 👨‍🔧')
@@ -686,7 +796,7 @@ async def electro(message: Message, state: FSMContext):
     # print(master)
 
 
-@dp.message_handler(regexp='🧹Уборка 🧼|🧹Uborka 🧼')
+@dp.message_handler(regexp='🧹Химчистка 🧼|🧹Уборка 🧼|🧹Uborka 🧼')
 async def uborka(message: Message, state: FSMContext):
     if message.text == '🧹Uborka 🧼':
         caption = 'Chap tomonda xizmat kodi mavjud'
@@ -757,11 +867,6 @@ async def application(message: Message, state=FSMContext):
             await message.answer('Выберите код сервиса уборки которым хотите воспользоваться ⬇️: ',
                                  reply_markup=generate_uborka_menu())
             await NewStateGroup.service.set()
-    # else:
-    #     if lang == ('ru',):
-    #         await message.answer('У вас не достаток информации пожалуйуста зарегестрируйтесь /register')
-    #     if lang == ('uz',):
-    #         await message.answer('Malumot kamlikk qivtodi iltimos regestratsiyadan oting /register')
 
 
 @dp.message_handler(commands=['get_user'])
@@ -920,10 +1025,12 @@ async def title_send(message: Message, state: FSMContext):
             # print(sender_id)
             # await bot.forward_message(chat_id=sender_id, from_chat_id=group, message=f'{message.photo+message.caption }'),
             if lang == ru:
-                await bot.send_photo(chat_id=sender_id, photo=photo_file_id, caption=caption, reply_markup=generate_dov_menu('ru')),
+                await bot.send_photo(chat_id=sender_id, photo=photo_file_id, caption=caption,
+                                     reply_markup=generate_dov_menu('ru')),
                 await bot.send_message(text='Оцените пожалуйста качество сервиса', chat_id=sender_id)
             elif lang == uz:
-                await bot.send_photo(chat_id=sender_id, photo=photo_file_id, caption=caption, reply_markup=generate_dov_menu('uz')),
+                await bot.send_photo(chat_id=sender_id, photo=photo_file_id, caption=caption,
+                                     reply_markup=generate_dov_menu('uz')),
                 await bot.send_message(text="Iltimos, xizmat sifatini baholang", chat_id=sender_id)
             await state.finish()
             await message.answer('Yuborildi ✅')
@@ -961,9 +1068,9 @@ async def title_send(message: Message, state: FSMContext):
             # print(sender_id)
             # await bot.forward_message(chat_id=sender_id, from_chat_id=group, message=f'{message.photo+message.caption }'),
             if lang == ru:
-                await bot.send_message(text=f'{text}',chat_id=sender_id)
+                await bot.send_message(text=f'{text}', chat_id=sender_id)
             elif lang == uz:
-                await bot.send_message(text=f'{text}',chat_id=sender_id)
+                await bot.send_message(text=f'{text}', chat_id=sender_id)
             await state.finish()
             await message.answer('Yuborildi ✅')
 
@@ -993,6 +1100,7 @@ async def personality(message: Message):
     #     await bot.send_message(group, f'{message.from_user} '
     #                                   f'Просит свои даные лицевого счета ')
 
+
 # ❌
 
 
@@ -1000,15 +1108,19 @@ async def personality(message: Message):
 async def process_request(message: Message, state: FSMContext):
     user_id = message.from_user.id
     user_name = message.from_user.username
-    user = first_select_users(user_id)
+    typo = get_type(user_id)
     branch = get_user_branch(user_id)
     async with state.proxy() as data:
         master = data['master_service']
+        print(master)
+        print(master == '🧹Химчистка 🧼')
+
         # print(branch)
         # print(branch == ('GreenPark',))
         # print(branch == ('QUSHBEGI'))
         # print('o00o', master == str('👨‍🔧 Сантехник 🪠') or master == str('🪠Santexnik 👨‍🔧'))
-    if branch == ('GreenPark',) or branch == ('Adliya',):
+
+    if typo == 'resident':
         if master == str('🔌 Электрик ⚡') or master == str('🔌 Elektrik ⚡'):
             master = 'Электрик'
             branch = '1/2'
@@ -1046,12 +1158,56 @@ async def process_request(message: Message, state: FSMContext):
         await bot.send_photo(chat_id=group, photo=InputFile('media/servise.png'), caption=text)
         # await bot.send_photo(chat_id=group, photo=InputFile('media/93-3-2.png'))
         if language == 'ru':
-            await message.answer('Ваша заявка принята ✅,\nскоро с вами свяжутся', reply_markup=generate_main_menu('Russian 🇷🇺'))
+            await message.answer('Ваша заявка принята ✅,\nскоро с вами свяжутся',
+                                 reply_markup=generate_main_menu('Russian 🇷🇺', 'resident'))
         elif language == 'uz':
-            await message.answer("Sizning arizangiz qabul qilindi ✅,\ntez orada siz bilan bog'lanamiz", reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
+            await message.answer("Sizning arizangiz qabul qilindi ✅,\ntez orada siz bilan bog'lanamiz",
+                                 reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'resident'))
+        await state.finish()
+    elif typo == 'client':
+        if master == str('🔌 Электрик ⚡') or master == str('🔌 Elektrik ⚡'):
+            master = 'Электрик'
+            branch = '1/2'
+            master_user = get_master(master, branch)
+            cleaned_users = [user[0].replace("('", "").replace("',)", "") for user in master_user]
+
+            await bot.send_message(chat_id=group,
+                                   text=f"Yangi elektrchi so'rovi olindi, iltimos, xizmat ko'rsating:\n{cleaned_users}")
+        elif master == str('👨‍🔧 Сантехник 🪠') or master == str('🪠Santexnik 👨‍🔧'):
+            master = 'Сантехник'
+            branch = '1/2'
+            master_user = get_master(master, branch)
+            cleaned_users = [user[0].replace("[(''", "").replace("'',)]", "") for user in master_user]
+
+            # print(f'E#########{master_user}')
+            await bot.send_message(chat_id=group,
+                                   text=f"Santexnikga yangi talab olindi,iltimos xizmat qiling:\n{cleaned_users}")
+
+        elif master == str('🧹Химчистка 🧼') or str('🧹Уборка 🧼') or master == str('🧹Uborka 🧼'):
+            master = 'Уборщица'
+            branch = '1/2'
+            master_user = get_master(master, branch)
+            cleaned_users = [user[0].replace("('", "").replace("',)", "") for user in master_user]
+            await bot.send_message(chat_id=group,
+                                   text=f"Xaridordan xizmat so'rovi olindi, iltimos, xizmatni taqdim eting:\n{cleaned_users}")
+        full_name, phone, language, user_name = get_client_info(user_id)
+        text = f"---Xaridor info 👇🏻---\n"
+        text += f'Ism: {full_name}\n'
+        text += f'Yuzer: @{user_name}\n'
+        text += f'ID: <u>{user_id}</u>\n'
+        text += f'Telefon raqami: +{phone}\n'
+        text += f"Til: {language}\n"
+        text += f"Xizmat: \t{message.text}"
+        await bot.send_photo(chat_id=group, photo=InputFile('media/servise.png'), caption=text)
+        if language == 'ru':
+            await message.answer('Ваша заявка принята ✅,\nскоро с вами свяжутся',
+                                 reply_markup=generate_main_menu('Russian 🇷🇺', 'client'))
+        elif language == 'uz':
+            await message.answer("Sizning arizangiz qabul qilindi ✅,\ntez orada siz bilan bog'lanamiz",
+                                 reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'client'))
         await state.finish()
     else:
-        await message.answer('else 404, no such branch')
+        await message.answer('None resident\nnot even customer')
 
 
 @dp.message_handler(regexp='🤗 Qoniq topdim rahmat ✅|🤗Доволен спасибо ✅')
@@ -1059,11 +1215,14 @@ async def dovolen(message: Message):
     user_id = message.from_user.id
     lang = get_lang_by_id(user_id)
     if lang == ru:
-        await message.answer('Спасибо за оценку качество,вы вернулись в главное меню:', reply_markup=generate_main_menu('Russian 🇷🇺'))
+        await message.answer('Спасибо за оценку качество,вы вернулись в главное меню:',
+                             reply_markup=generate_main_menu('Russian 🇷🇺', 'resident'))
     elif lang == uz:
         await message.answer('Sifat reytingingiz uchun rahmat, siz asosiy menyuga qaytasiz:',
-                             reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
-    await bot.send_message(text=f'{message.from_user.full_name}dan\t- @{message.from_user.username}\t{message.text}\nrezidentdan minnatdorchilik bildirildi, MyHelper jamoasiga raxmat', chat_id=group)
+                             reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'resident'))
+    await bot.send_message(
+        text=f'{message.from_user.full_name}dan\t- @{message.from_user.username}\t{message.text}\nrezidentdan minnatdorchilik bildirildi, MyHelper jamoasiga raxmat',
+        chat_id=group)
 
     # else:
     #     await message.answer('error 404')
@@ -1078,25 +1237,34 @@ async def nedovolen(message: Message):
     lang = get_lang_by_id(user_id)
     if lang == ru:
         await message.answer('Спасибо за оценку качество,вы вернулись в главное меню:',
-                             reply_markup=generate_main_menu('Russian 🇷🇺'))
+                             reply_markup=generate_main_menu('Russian 🇷🇺', 'resident'))
     elif lang == uz:
         await message.answer('Sifat reytingingiz uchun rahmat, siz asosiy menyuga qaytasiz:',
-                             reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
+                             reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'resident'))
     await bot.send_message(
-            text=f'{message.from_user.full_name}dan\t- @{message.from_user.username}\t{message.text}\nrezidentdan servisdan maqulmasligini bildirildi, MyHelper jamoasiga',
-            chat_id=group)
+        text=f'{message.from_user.full_name}dan\t- @{message.from_user.username}\t{message.text}\nrezidentdan servisdan maqulmasligini bildirildi, MyHelper jamoasiga',
+        chat_id=group)
+
 
 # ✅
 @dp.message_handler(regexp='Нет ❌|Yoq ❌')
 async def nope(message: Message):
     user_id = message.from_user.id
-    lang = get_lang(user_id)
-    if lang == uz:
-        # await message.answer('Orqaga', reply_markup=types.ReplyKeyboardRemove())
-        await message.answer('Siz xizmatlar menyusidasiz', reply_markup=generate_service_menu('Özbekcha 🇺🇿'))
-    elif lang == ru:
-        # await message.answer('Назад', reply_markup=types.ReplyKeyboardRemove())
-        await message.answer('Вы в меню сервисов', reply_markup=generate_service_menu('Russian 🇷🇺'))
+    typo = get_type(user_id)
+    if typo == 'resident':
+        lang = get_lang(user_id)
+        if lang == uz:
+            await message.answer('Siz xizmatlar menyusidasiz',
+                                 reply_markup=generate_service_menu('Özbekcha 🇺🇿', "resident"))
+        elif lang == ru:
+            await message.answer('Вы в меню сервисов', reply_markup=generate_service_menu('Russian 🇷🇺', 'resident'))
+    elif typo == 'client':
+        lang = get_client_lang(user_id)
+        if lang == uz:
+            await message.answer('Siz xizmatlar menyusidasiz',
+                                 reply_markup=generate_service_menu('Özbekcha 🇺🇿', "client"))
+        elif lang == ru:
+            await message.answer('Вы в меню сервисов', reply_markup=generate_service_menu('Russian 🇷🇺', 'client'))
 
 
 # ✅ ❌
@@ -1114,8 +1282,8 @@ async def green(message: Message):
         await bot.send_photo(chat_id=message.from_user.id, photo=InputFile('media/adl.jpg'),
                              caption='+998 90 957 60 56 -\tlift | лифт\n+998 95 388 88 06 -\t santexnik | сантехник\n+998 95 388 88 05 -\t elektrik | электрик\n+998 97 103 45 01 -\t'
                                      'domofon | домофон\n+998 95 388 88 03 -\tqorovul | охранник\n+998 95 388 88 07 - sifat menedjeri | менеджер по качеству'),
-                                    # caption='90 957 60 56 -\tlift | лифт\n91 101 72 21 -\t santexnik | сантехник\n99 854 13 81 -\t elektrik | электрик\n+998971034501 -\t'
-                                     # 'domofon | домофон\n+998 997919995 -\t qorovul | охранник'),
+        # caption='90 957 60 56 -\tlift | лифт\n91 101 72 21 -\t santexnik | сантехник\n99 854 13 81 -\t elektrik | электрик\n+998971034501 -\t'
+        # 'domofon | домофон\n+998 997919995 -\t qorovul | охранник'),
 
 
 # ✅
@@ -1136,9 +1304,11 @@ async def get_num(message: Message):
         ]
         await bot.send_media_group(message.chat.id, media=group_933)
         if lang == uz:
-            await message.answer("Adliya da yashovchilar ro'yxatidan shaxsiy hisobingizni qidiring", reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
+            await message.answer("Adliya da yashovchilar ro'yxatidan shaxsiy hisobingizni qidiring",
+                                 reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'resident'))
         elif lang == ru:
-            await message.answer("Найдите свой лицевой счет в списке живуших в Adliya", reply_markup=generate_main_menu('Russian 🇷🇺'))
+            await message.answer("Найдите свой лицевой счет в списке живуших в Adliya",
+                                 reply_markup=generate_main_menu('Russian 🇷🇺', 'resident'))
 
 
 # ✅
@@ -1240,12 +1410,13 @@ async def duty(message: Message):
     home_id = get_home_id(user_id)
     lang = get_lang(user_id)
     if lang == ru:
-        await message.answer('Информацию о своем лицевом счете вы можете узнать используя click, payme uzum итд, в разделе Mening Uyim',
-                             reply_markup=generate_main_menu('Russian 🇷🇺'))
+        await message.answer(
+            'Информацию о своем лицевом счете вы можете узнать используя click, payme uzum итд, в разделе Mening Uyim',
+            reply_markup=generate_main_menu('Russian 🇷🇺', 'resident'))
     elif lang == uz:
         await message.answer(
             "Shaxsiy kabinetingiz haqidagi ma'lumotlarni click, payme uzum va boshqalarlar yordamida bilib olishingiz mumkin, Mening Uyim servisida",
-            reply_markup=generate_main_menu('Özbekcha 🇺🇿'))
+            reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'resident'))
 
 
 # ✅
@@ -1305,10 +1476,18 @@ async def title_send(message: Message, state: FSMContext):
 # ❌
 @dp.message_handler(regexp='Sozlamalar ⚙️|Настройки ⚙️')
 async def setting(message: Message):
-    if message.text == 'Sozlamalar ⚙️':
-        await message.answer('Sozlamalar menyusi', reply_markup=generate_settings_menu('Özbekcha 🇺🇿'))
-    elif message.text == 'Настройки ⚙️':
-        await message.answer('Меню настроек', reply_markup=generate_settings_menu('Russian 🇷🇺'))
+    user_id = message.from_user.id
+    typo = get_type(user_id)
+    if typo == 'resident':
+        if message.text == 'Sozlamalar ⚙️':
+            await message.answer('Sozlamalar menyusi', reply_markup=generate_settings_menu('Özbekcha 🇺🇿', 'resident'))
+        elif message.text == 'Настройки ⚙️':
+            await message.answer('Меню настроек', reply_markup=generate_settings_menu('Russian 🇷🇺', 'resident'))
+    elif typo == 'client':
+        if message.text == 'Sozlamalar ⚙️':
+            await message.answer('Sozlamalar menyusi', reply_markup=generate_settings_menu('Özbekcha 🇺🇿', 'client'))
+        elif message.text == 'Настройки ⚙️':
+            await message.answer('Меню настроек', reply_markup=generate_settings_menu('Russian 🇷🇺', 'client'))
 
 
 # ✅
@@ -1344,6 +1523,7 @@ async def get_new_name(message: Message):
     language = get_lang_by_id(user_id)
     ru = 'ru',
     uz = 'uz',
+
     if language == ru:
         await message.reply('Пришлите свое новое имя:')
         await NewStateGroup.new_name.set()
@@ -1355,50 +1535,80 @@ async def get_new_name(message: Message):
 @dp.message_handler(state=NewStateGroup.new_name)
 async def load_new_name(message: Message, state: FSMContext):
     user_id = message.from_user.id
-    language = get_lang_by_id(user_id)
+    typo = get_type(user_id)
     ru = 'ru',
     uz = 'uz',
     async with state.proxy() as data:
         new_name = data['name'] = message.text
-        update_name(new_name, user_id)
-        if language == ru:
-            await message.reply('Ваше имя изменено!')
-            await state.finish()
-        if language == uz:
-            await message.reply("Ismingiz o'zgartirildi!")
-            await state.finish()
+        if typo == 'resident':
+            language = get_lang_by_id(user_id)
+            update_name(new_name, user_id)
+            if language == ru:
+                await message.reply('Ваше имя изменено!')
+                await state.finish()
+            if language == uz:
+                await message.reply("Ismingiz o'zgartirildi!")
+                await state.finish()
+        elif typo == 'client':
+            lang = get_client_lang(user_id)
+            update_client_name(new_name, user_id)
+            if lang == ru:
+                await message.reply('Ваше имя изменено!')
+                await state.finish()
+            if lang == uz:
+                await message.reply("Ismingiz o'zgartirildi!")
+                await state.finish()
 
 
 @dp.message_handler(regexp="📞 Telefon raqamini o'zgartirish ☎️|📞 Сменить номер телефона ☎️")
 async def get_new_phone(message: Message):
     user_id = message.from_user.id
     language = get_lang_by_id(user_id)
-    # ru = 'ru',
-    # uz = 'uz',
+    typo = get_type(user_id)
+    # if typo == 'resident':
     if language == ru:
         await message.reply('Пришлите свой новый номер:', reply_markup=generate_phone('Russian 🇷🇺'))
         await NewStateGroup.new_contact.set()
     elif language == uz:
         await message.reply('Yangi raqamingizni yuboring:', reply_markup=generate_phone('Özbekcha 🇺🇿'))
         await NewStateGroup.new_contact.set()
+    # elif typo == 'client':
+    #     if language == ru:
+    #         await message.reply('Пришлите свой новый номер:', reply_markup=generate_phone('Russian 🇷🇺'))
+    #         await NewStateGroup.new_contact.set()
+    #     elif language == uz:
+    #         await message.reply('Yangi raqamingizni yuboring:', reply_markup=generate_phone('Özbekcha 🇺🇿'))
+    #         await NewStateGroup.new_contact.set()
 
 
 @dp.message_handler(state=NewStateGroup.new_contact, content_types=['contact'])
 async def load_new_phone(message: Message, state: FSMContext):
     user_id = message.from_user.id
     language = get_lang_by_id(user_id)
+    typo = get_type(user_id)
     ru = 'ru',
     uz = 'uz',
     async with state.proxy() as data:
         new_phone = data['contact'] = message.contact.phone_number
         # print(new_phone)
-        update_phone(new_phone, user_id)
-        if language == ru:
-            await message.reply('Ваш номер изменен!', reply_markup=generate_settings_menu('Russian 🇷🇺'))
-            await state.finish()
-        if language == uz:
-            await message.reply("Sizning raqamingiz o'zgartirildi!", reply_markup=generate_settings_menu('Özbekcha 🇺🇿'))
-            await state.finish()
+        if typo == 'resident':
+            update_phone(new_phone, user_id)
+            if language == ru:
+                await message.reply('Ваш номер изменен!', reply_markup=generate_settings_menu('Russian 🇷🇺', 'resident'))
+                await state.finish()
+            if language == uz:
+                await message.reply("Sizning raqamingiz o'zgartirildi!",
+                                    reply_markup=generate_settings_menu('Özbekcha 🇺🇿', 'resident'))
+                await state.finish()
+        elif typo == 'client':
+            update_client_phone(new_phone, user_id)
+            if language == ru:
+                await message.reply('Ваш номер изменен!', reply_markup=generate_settings_menu('Russian 🇷🇺', 'client'))
+                await state.finish()
+            if language == uz:
+                await message.reply("Sizning raqamingiz o'zgartirildi!",
+                                    reply_markup=generate_settings_menu('Özbekcha 🇺🇿', 'client'))
+                await state.finish()
 
 
 @dp.message_handler(regexp="Manzilni o'zgartirish 🏘️|Изменить адрес 🏘️")
@@ -1440,10 +1650,12 @@ async def load_new_address(message: Message, state: FSMContext):
         new_address = data['new_address'] = message.text
         update_address(new_address, user_id)
         if language == ru:
-            await message.answer(f"{new_address}\nадрес успешно изменен!", reply_markup=generate_settings_menu("Russian 🇷🇺"))
+            await message.answer(f"{new_address}\nадрес успешно изменен!",
+                                 reply_markup=generate_settings_menu("Russian 🇷🇺", 'resident'))
             await state.finish()
         if language == uz:
-            await message.answer(f"{new_address}\nmanzil ozgartirildi!", reply_markup=generate_settings_menu('Özbekcha 🇺🇿'))
+            await message.answer(f"{new_address}\nmanzil ozgartirildi!",
+                                 reply_markup=generate_settings_menu('Özbekcha 🇺🇿', 'resident'))
             await state.finish()
 
 
@@ -1490,7 +1702,7 @@ async def admin_help(message: Message):
     user_id = message.from_user.id
     # if user_id in boss:
     await message.reply(
-            "/id - пришлет вам ваш телеграмм id\n/register_admin - зарегистрирует админа\n/delete_admin - если напишет сам то удалит себя а если Джахонгир ака то после ввода его id\n/delete - тоже самое, только юзеров\n/sendall- отправит всем что вы напишите кто хотяб просто когда либо нажимал /start\n/send_branch - отправит рассылку на филиал на который вы укажите\n/get_user - вытащит все о юзере из базы данных (надо ввести его Id)\n/get_admin - работает так же как и get_user только с админами")
+        "/id - пришлет вам ваш телеграмм id\n/register_admin - зарегистрирует админа\n/delete_admin - если напишет сам то удалит себя а если Джахонгир ака то после ввода его id\n/delete - тоже самое, только юзеров\n/sendall- отправит всем что вы напишите кто хотяб просто когда либо нажимал /start\n/send_branch - отправит рассылку на филиал на который вы укажите\n/get_user - вытащит все о юзере из базы данных (надо ввести его Id)\n/get_admin - работает так же как и get_user только с админами")
     # else:
     #     await message.answer('error 404')
 
@@ -1513,13 +1725,15 @@ async def client_reg(message: Message):
     uz = 'uz'
     if message.text == 'Клиент':
         register_client_lang(user_id, name, ru, user_name)
-        await message.answer("Уважаемый клиент, чтобы воспользоваться услугами MyHelper, нам необходимо пройти небольшую регистрацию.")
+        await message.answer(
+            "Уважаемый клиент, чтобы воспользоваться услугами MyHelper, нам необходимо пройти небольшую регистрацию.")
         await message.answer("Начинаем малую регистрацию,\nпришлите свое имя", reply_markup=generate_name(name))
         await ClientsGroup.name.set()
     else:
         register_client_lang(user_id, name, uz, user_name)
         await message.answer("Hurmatli mijoz, MyHelper xizmatlaridan foydalanish uchun kichik ro'yxatdan o'tamiz.")
-        await message.answer("Biz kichik ro'yxatga olishni boshlaymiz,\nismingizni yuboring", reply_markup=generate_name(name))
+        await message.answer("Biz kichik ro'yxatga olishni boshlaymiz,\nismingizni yuboring",
+                             reply_markup=generate_name(name))
         await ClientsGroup.name.set()
 
 
@@ -1529,32 +1743,41 @@ async def client_name(message: Message, state: FSMContext):
     lang = get_client_lang(user_id)
     print('uuu')
     async with state.proxy() as data:
-        data['name'] = message.text
+        name = data['name'] = message.text
     if lang == ru:
-        await message.answer(f'{message.text} теперь отправьте пожалуйуста ваш номер', reply_markup=generate_phone("Russian 🇷🇺"))
+        await message.answer(f'{name} теперь отправьте пожалуйуста ваш номер',
+                             reply_markup=generate_phone("Russian 🇷🇺"))
         await ClientsGroup.next()
     elif lang == uz:
         await message.answer(f'{message.text} endi nomerizni yuboring', reply_markup=generate_phone('Özbekcha 🇺🇿'))
         await ClientsGroup.next()
 
 
-@dp.message_handler(state =ClientsGroup.contact, content_types=['contact'])
-async def reg_phone(message: Message, state:FSMContext):
+@dp.message_handler(state=ClientsGroup.contact, content_types=['contact'])
+async def reg_phone(message: Message, state: FSMContext):
     user_id = message.from_user.id
     async with state.proxy() as data:
-        data['contact'] = message.contact.phone_number
+        phone = data['contact'] = message.contact.phone_number
+        name = data['name']
+        update_client_data(name, user_id, phone)
         lang = get_client_lang(user_id)
     if lang == ru:
-        await message.answer(f'{message.text} наша минни регистрация прошла успешно теперь можете пользоваться услугами MyHelper', reply_markup=generate_service_menu("Russian 🇷🇺"))
+        await message.answer(
+            f'{message.text} наша минни регистрация прошла успешно теперь можете пользоваться услугами MyHelper',
+            reply_markup=generate_main_menu("Russian 🇷🇺", 'client'))
         await ClientsGroup.next()
     elif lang == uz:
-        await message.answer(f"{message.text} bizning minnie ro'yxatdan o'tishimiz muvaffaqiyatli o'tdi, endi siz MyHelper xizmatlaridan foydalanishingiz mumkin ", reply_markup=generate_service_menu('Özbekcha 🇺🇿'))
+        await message.answer(
+            f"{message.text} bizning minnie ro'yxatdan o'tishimiz muvaffaqiyatli o'tdi, endi siz MyHelper xizmatlaridan foydalanishingiz mumkin ",
+            reply_markup=generate_main_menu('Özbekcha 🇺🇿', 'client'))
         await ClientsGroup.next()
 
 
-#          data['house_id'] = message.text
+# @dp.message_handler(commands=['location'], content_types='location')
+# async def location(message: Message):
+#     user_id = message.from_user.id
+#     latitude = message.location.latitude
+#     longitude = message.location.longitude
 
-       # async with state.proxy() as data:
-       #          data['house_id'] = message.text
 
 executor.start_polling(dp)

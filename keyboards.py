@@ -56,77 +56,139 @@ def generate_phone(lang):
         ], resize_keyboard=True, one_time_keyboard=True)
 
 
-def generate_main_menu(lang):
-    if lang == 'Russian 🇷🇺':
-        return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2).add(*
-                                                                          [
-                                                                              KeyboardButton(text='👨🏻‍💻Связатся с Админом 📞'),
-                                                                              KeyboardButton(text='Выбрать сервис ⛑️'),
-                                                                              KeyboardButton(text='📓 Узнать о лицевом счете 🧮'),
-                                                                              KeyboardButton(text='Аварийная ситуация 🚨'),
-                                                                              # KeyboardButton(text='Дополнительная информация'),
-                                                                              KeyboardButton(text='Настройки ⚙️')
+def generate_main_menu(lang, type):
+    if type == 'resident':
+        if lang == 'Russian 🇷🇺':
+            return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2).add(*
+                                                                              [
+                                                                                  KeyboardButton(text='👨🏻‍💻Связатся с Админом 📞'),
+                                                                                  KeyboardButton(text='Выбрать сервис ⛑️'),
+                                                                                  KeyboardButton(text='📓 Узнать о лицевом счете 🧮'),
+                                                                                  KeyboardButton(text='Аварийная ситуация 🚨'),
+                                                                                  # KeyboardButton(text='Дополнительная информация'),
+                                                                                  KeyboardButton(text='Настройки ⚙️')
 
 
-                                                                          ])
-    elif lang == 'Özbekcha 🇺🇿':
-        return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2).add(*
-                                                                          [
-                                                                              KeyboardButton(text='👨🏻‍💻Admin bilan boglanish📞'),
-                                                                              KeyboardButton(text='Xizmatni tanlang ⛑️'),
-                                                                              KeyboardButton(text='📓 Shaxsiy hisob haqida bilib olish 🧮'),
-                                                                              KeyboardButton(text='Favqulodda vaziyat 🚨'),
-                                                                              # KeyboardButton(text='Qoshimcha malumot'),
-                                                                              KeyboardButton(text='Sozlamalar ⚙️'),
+                                                                              ])
+        elif lang == 'Özbekcha 🇺🇿':
+            return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2).add(*
+                                                                              [
+                                                                                  KeyboardButton(text='👨🏻‍💻Admin bilan boglanish📞'),
+                                                                                  KeyboardButton(text='Xizmatni tanlang ⛑️'),
+                                                                                  KeyboardButton(text='📓 Shaxsiy hisob haqida bilib olish 🧮'),
+                                                                                  KeyboardButton(text='Favqulodda vaziyat 🚨'),
+                                                                                  # KeyboardButton(text='Qoshimcha malumot'),
+                                                                                  KeyboardButton(text='Sozlamalar ⚙️'),
 
-                                                                          ])
-
-
-def generate_settings_menu(lang):
-    if lang == "Russian 🇷🇺":
-        return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True).add(*
-                                                                          [
-                                                                              KeyboardButton(text='Сменить имя 👤'),
-                                                                              KeyboardButton(text='Изменить адрес 🏘️'),
-                                                                              KeyboardButton(text='Изменить лицевой счет 🧮'),
-                                                                              KeyboardButton(text='📞 Сменить номер телефона ☎️'),
-                                                                              KeyboardButton(text='Изменить язык 🇷🇺 🔀 🇺🇿'),
-                                                                              KeyboardButton(text='🔙')
-                                                                          ])
-    elif lang == 'Özbekcha 🇺🇿':
-        return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True).add(*
-                                                                          [
-                                                                              KeyboardButton(text='Ismimni ozgartirish 👤'),
-                                                                              KeyboardButton(text="Manzilni o'zgartirish 🏘️"),
-                                                                              KeyboardButton(text="Shaxsiy hisobni o'zgartirish 🧮"),
-                                                                              KeyboardButton(text="📞 Telefon raqamini o'zgartirish ☎️"),
-                                                                              KeyboardButton(text="Tilni o'zgartirish 🇺🇿 🔀 🇷🇺"),
-                                                                              KeyboardButton(
-                                                                                  text='⬅')
-                                                                          ])
+                                                                              ])
+    elif type == 'client':
+        if lang == 'Russian 🇷🇺':
+            return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2).add(*
+                                                                              [
+                                                                                  KeyboardButton(text='👨🏻‍💻Связатся с Админом 📞'),
+                                                                                  KeyboardButton(text='Выбрать сервис ⛑️'),
+                                                                                  KeyboardButton(text='Настройки ⚙️')
 
 
-def generate_service_menu(lang):
-    if lang == "Russian 🇷🇺":
-        return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2).add(*
-                                                                          [
-                                                                              KeyboardButton(text='🔌 Электрик ⚡'),
-                                                                              KeyboardButton(text='👨‍🔧 Сантехник 🪠'),
-                                                                              KeyboardButton(text='🧹Уборка 🧼'),
-                                                                              KeyboardButton(text='🔙')
-                                                                          ])
-    elif lang == 'Özbekcha 🇺🇿':
-        return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2).add(*
-                                                                          [
-                                                                              KeyboardButton(
-                                                                                  text='🔌 Elektrik ⚡'),
-                                                                              KeyboardButton(
-                                                                                  text='🪠Santexnik 👨‍🔧'),
-                                                                              KeyboardButton(
-                                                                                  text='🧹Uborka 🧼'),
-                                                                              KeyboardButton(
-                                                                                  text='⬅')
-                                                                          ])
+                                                                              ])
+        elif lang == 'Özbekcha 🇺🇿':
+            return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2).add(*
+                                                                              [
+                                                                                  KeyboardButton(text='👨🏻‍💻Admin bilan boglanish📞'),
+                                                                                  KeyboardButton(text='Xizmatni tanlang ⛑️'),
+                                                                                  KeyboardButton(text='Sozlamalar ⚙️'),
+
+                                                                              ])
+
+
+def generate_settings_menu(lang, typo):
+    if typo == 'resident':
+        if lang == "Russian 🇷🇺":
+            return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True).add(*
+                                                                              [
+                                                                                  KeyboardButton(text='Сменить имя 👤'),
+                                                                                  KeyboardButton(text='Изменить адрес 🏘️'),
+                                                                                  KeyboardButton(text='Изменить лицевой счет 🧮'),
+                                                                                  KeyboardButton(text='📞 Сменить номер телефона ☎️'),
+                                                                                  KeyboardButton(text='Изменить язык 🇷🇺 🔀 🇺🇿'),
+                                                                                  KeyboardButton(text='🔙')
+                                                                              ])
+        elif lang == 'Özbekcha 🇺🇿':
+            return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True).add(*
+                                                                              [
+                                                                                  KeyboardButton(text='Ismimni ozgartirish 👤'),
+                                                                                  KeyboardButton(text="Manzilni o'zgartirish 🏘️"),
+                                                                                  KeyboardButton(text="Shaxsiy hisobni o'zgartirish 🧮"),
+                                                                                  KeyboardButton(text="📞 Telefon raqamini o'zgartirish ☎️"),
+                                                                                  KeyboardButton(text="Tilni o'zgartirish 🇺🇿 🔀 🇷🇺"),
+                                                                                  KeyboardButton(
+                                                                                      text='⬅')
+                                                                              ])
+    elif typo == 'client':
+        if lang == "Russian 🇷🇺":
+            return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True).add(*
+                                                                              [
+                                                                                  KeyboardButton(text='Сменить имя 👤'),
+                                                                                  KeyboardButton(text='📞 Сменить номер телефона ☎️'),
+                                                                                  KeyboardButton(text='Изменить язык 🇷🇺 🔀 🇺🇿'),
+                                                                                  KeyboardButton(text='🔙')
+                                                                              ])
+        elif lang == 'Özbekcha 🇺🇿':
+            return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True).add(*
+                                                                              [
+                                                                                  KeyboardButton(text='Ismimni ozgartirish 👤'),
+                                                                                  KeyboardButton(text="📞 Telefon raqamini o'zgartirish ☎️"),
+                                                                                  KeyboardButton(text="Tilni o'zgartirish 🇺🇿 🔀 🇷🇺"),
+                                                                                  KeyboardButton(
+                                                                                      text='⬅')
+                                                                              ])
+
+
+def generate_service_menu(lang, type):
+    if type == "resident":
+        if lang == "Russian 🇷🇺":
+            return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2).add(*
+                                                                              [
+                                                                                  KeyboardButton(text='🔌 Электрик ⚡'),
+                                                                                  KeyboardButton(text='👨‍🔧 Сантехник 🪠'),
+                                                                                  KeyboardButton(text='🧹Уборка 🧼'),
+                                                                                  KeyboardButton(text='🔙')
+                                                                              ])
+        elif lang == 'Özbekcha 🇺🇿':
+            return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2).add(*
+                                                                              [
+                                                                                  KeyboardButton(
+                                                                                      text='🔌 Elektrik ⚡'),
+                                                                                  KeyboardButton(
+                                                                                      text='🪠Santexnik 👨‍🔧'),
+                                                                                  KeyboardButton(
+                                                                                      text='🧹Uborka 🧼'),
+                                                                                  KeyboardButton(
+                                                                                      text='⬅')
+                                                                              ])
+    elif type == "client":
+        if lang == "Russian 🇷🇺":
+            return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2).add(*
+                                                                              [
+                                                                                  KeyboardButton(text='🔌 Электрик ⚡'),
+                                                                                  KeyboardButton(text='👨‍🔧 Сантехник 🪠'),
+                                                                                  # KeyboardButton(text='🧹Химчистка 🧼'),
+                                                                                  KeyboardButton(text='🧹Уборка 🧼'),
+
+                                                                                  KeyboardButton(text='🔙')
+                                                                              ])
+        elif lang == 'Özbekcha 🇺🇿':
+            return ReplyKeyboardMarkup(resize_keyboard=True, row_width=2).add(*
+                                                                              [
+                                                                                  KeyboardButton(
+                                                                                      text='🔌 Elektrik ⚡'),
+                                                                                  KeyboardButton(
+                                                                                      text='🪠Santexnik 👨‍🔧'),
+                                                                                  KeyboardButton(
+                                                                                      text='🧹Uborka 🧼'),
+                                                                                  KeyboardButton(
+                                                                                      text='⬅')
+                                                                              ])
 
 
 def generate_back_menu(lang):
