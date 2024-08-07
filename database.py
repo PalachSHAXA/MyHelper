@@ -58,12 +58,12 @@ def delete():
 def delete_clients():
     cursor.execute('''
      DROP TABLE IF EXISTS clients''')
-
+#
 # create_users_table()
 # create_admins_table()
-# delete()
-
-create_clients_table()
+# # delete()
+#
+# create_clients_table()
 
 
 
