@@ -51,3 +51,6 @@ ujson==5.8.0
 urllib3==2.0.4
 verboselogs==1.7
 yarl==1.9.2
+
+pandas~=2.2.2
+openpyxl~=3.1.5

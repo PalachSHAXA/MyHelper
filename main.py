@@ -1,4 +1,11 @@
 ﻿import logging
+import os
+import sqlite3
+import pandas as pd
+from aiogram import types
+from aiogram.types import InputFile
+import os
+from openpyxl import load_workbook
 from aiogram.types import InputFile
 from aiogram.utils import executor
 from dotenv import load_dotenv
@@ -1773,11 +1780,39 @@ async def reg_phone(message: Message, state: FSMContext):
         await ClientsGroup.next()
 
 
-# @dp.message_handler(commands=['location'], content_types='location')
-# async def location(message: Message):
-#     user_id = message.from_user.id
-#     latitude = message.location.latitude
-#     longitude = message.location.longitude
+@dp.message_handler(commands=['exel'])
+async def send_excel(message: types.Message):
+    if str(message.chat.id) == GROUP_ID:
+        try:
+            # Подключение к базе данных
+            conn = sqlite3.connect('myhelper.db')
 
+            # Чтение данных из таблицы users
+            df_users = pd.read_sql_query("SELECT * FROM users", conn)
+
+            # Чтение данных из таблицы cases
+            df_cases = pd.read_sql_query("SELECT * FROM clients", conn)
+
+
+            df_admins = pd.read_sql_query("SELECT * FROM admins", conn)
+
+            # Закрытие соединения с базой данных
+            conn.close()
+
+            # Создание Excel файла с двумя листами
+            excel_file = 'bot_base.xlsx'
+            with pd.ExcelWriter(excel_file, engine='openpyxl') as writer:
+                df_users.to_excel(writer, sheet_name='Users', index=False)
+                df_users.to_excel(writer, sheet_name='Clients', index=False)
+                df_cases.to_excel(writer, sheet_name='Admins', index=False)
+
+            # Отправка файла в группу администраторов
+            await bot.send_document(chat_id=GROUP_ID, document=InputFile(excel_file))
+            os.remove(excel_file)
+
+        except Exception as e:
+            await message.reply(f"Произошла ошибка при экспорте данных: {e}")
+    else:
+        await message.reply("Эта команда доступна только для администраторов.")
 
 executor.start_polling(dp)
