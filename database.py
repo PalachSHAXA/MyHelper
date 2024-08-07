@@ -19,6 +19,7 @@ def create_users_table():
     )
     ''')
 
+
 def create_clients_table():
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS clients(
@@ -44,12 +45,15 @@ def create_admins_table():
     )
     ''')
 # todo команда обсуживающея 1/2 2/2
+
 def delete():
     cursor.execute('''
      DROP TABLE IF EXISTS users''')
     cursor.execute('''
      DROP TABLE IF EXISTS clients''')
 
+#
+#
 
 def delete_clients():
     cursor.execute('''
@@ -57,7 +61,8 @@ def delete_clients():
 
 # create_users_table()
 # create_admins_table()
-# delete_clients()
+# delete()
+
 create_clients_table()
 
 
